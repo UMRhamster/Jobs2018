@@ -205,8 +205,8 @@
 把进程的虚拟空间被划分成若干个长度相等的页，还把内存空间也按页的大小划分为片或页面。页式管理采用请求调用或预调用技术实现了内外存储器的统一管理。
 
 ### 1. 地址变换
+ <center><img src="https://github.com/UMRhamster/Jobs2018/raw/master/operating%20system/page_management.png"/></center>
 
-    ![图片](https://github.com/UMRhamster/Jobs2018/raw/master/operating%20system/page_management.png)
     例：有一系统采用页式存储管理，有一作业大小是8KB，页大小为2KB，依次装入内存的第7、9、10、5块，试将虚地址7145，3412转换成内存地址。
 
     (1) 虚地址 7145
@@ -226,6 +226,7 @@
   选择在内存驻留时间最长的页将其淘汰。
 * ### 最近最久未使用算法
   当需要淘汰某一页时，选择离当前时间最近的一段时间内最久没有使用过的页先淘汰。即当需要淘汰一页时，选择最长时间未使用的页
+  <center>
   <table border="1">
   <tr>
   <td>7</td><td>0</td><td>1</td><td>2</td><td>0</td><td>3</td><td>0</td><td>4</td><td>2</td><td>3</td><td>0</td><td>3</td><td>2</td><td>1</td><td>2</td><td>0</td><td>1</td>
@@ -240,6 +241,7 @@
   </tr>
   </tr>
   </table>
+  </center>
   要完全实现LRU算法需花费巨大的系统开销（必须对每一个页面都设置有关的访问记录项，而且每一次访问都必须更新这些记录）。常用的近似算法：
 
   - 最不经常使用页面淘汰算法LFU(least fraquently used)
