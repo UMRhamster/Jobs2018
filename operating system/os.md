@@ -319,10 +319,10 @@
   <center><img src="https://github.com/UMRhamster/Jobs2018/raw/master/operating%20system/disk_fcfs.png"/></center>
 
 * 最短寻道时间优先
-  <center><img src="https://github.com/UMRhamster/Jobs2018/raw/master/operating%20system/disk_scan.png"/></center>
+  <center><img src="https://github.com/UMRhamster/Jobs2018/raw/master/operating%20system/disk_sstf.png"/></center>
 
 * 扫描算法
-  <center><img src="https://github.com/UMRhamster/Jobs2018/raw/master/operating%20system/disk_fcfs.png"/></center>
+  <center><img src="https://github.com/UMRhamster/Jobs2018/raw/master/operating%20system/disk_scan.png"/></center>
 
 <h1 id="7">七、设备管理</h1>
 <h2 id="7.1">数据传送方式</h2> 
