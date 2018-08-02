@@ -238,7 +238,7 @@
 * 最近最久未使用算法
   当需要淘汰某一页时，选择离当前时间最近的一段时间内最久没有使用过的页先淘汰。即当需要淘汰一页时，选择最长时间未使用的页
   <center>
-  <table border="1">
+  <table>
   <tr>
   <td>7</td><td>0</td><td>1</td><td>2</td><td>0</td><td>3</td><td>0</td><td>4</td><td>2</td><td>3</td><td>0</td><td>3</td><td>2</td><td>1</td><td>2</td><td>0</td><td>1</td>
   </tr>
