@@ -2,6 +2,12 @@
   - [基本数据类型及其包装类型](#1.1)
   - [引用类型](#1.2)
   - [值传递和引用传递](#1.3)
+* [二、String](#2)
+  - [String类](#2.1)
+  - [字符串常量池](#2.2)
+  - [intern()](#2.3)
+  - [==和equals](#2.4)
+  - [String、StringBuilfer、StringBuffer](#2.5)
 <h1 id="1">一、数据类型</h1>
 <h2 id="1.1">基本数据类型及其包装类型</h2>
 <table>
@@ -190,3 +196,121 @@ change方法使用String类型为参数，其结果如下：
 
 所以说，Java中其实还是值传递的，只不过对于对象参数，值的内容是对象的引用。
 
+<h1 id="2">二、String</h1>
+<h2 id="2.1">String类</h2>
+
+    public final class String
+        implements java.io.Serializable, Comparable<String>, CharSequence {
+        /** The value is used for character storage. */
+        private final char value[];
+
+从上面可以看出String类是final类，因此String不可以被继承。
+String内部使用char数组存储数据，并且该数组也被final修饰，这意味着 value 数组初始化之后就不能再引用其它数组。并且 String 内部没有改变 value 数组的方法，因此可以保证 String 不可变。
+
+    public String substring(int beginIndex, int endIndex) {
+        if (beginIndex < 0) {
+            throw new StringIndexOutOfBoundsException(beginIndex);
+        }
+        if (endIndex > value.length) {
+            throw new StringIndexOutOfBoundsException(endIndex);
+        }
+        int subLen = endIndex - beginIndex;
+        if (subLen < 0) {
+            throw new StringIndexOutOfBoundsException(subLen);
+        }
+        return ((beginIndex == 0) && (endIndex == value.length)) ? this
+                : new String(value, beginIndex, subLen);
+    }
+
+    public String concat(String str) {
+        int otherLen = str.length();
+        if (otherLen == 0) {
+            return this;
+        }
+        int len = value.length;
+        char buf[] = Arrays.copyOf(value, len + otherLen);
+        str.getChars(buf, len);
+        return new String(buf, true);
+    }
+
+    public String replace(char oldChar, char newChar) {
+        if (oldChar != newChar) {
+            int len = value.length;
+            int i = -1;
+            char[] val = value; /* avoid getfield opcode */
+
+            while (++i < len) {
+                if (val[i] == oldChar) {
+                    break;
+                }
+            }
+            if (i < len) {
+                char buf[] = new char[len];
+                for (int j = 0; j < i; j++) {
+                    buf[j] = val[j];
+                }
+                while (i < len) {
+                    char c = val[i];
+                    buf[i] = (c == oldChar) ? newChar : c;
+                    i++;
+                }
+                return new String(buf, true);
+            }
+        }
+        return this;
+    }
+从上面的三个方法可以看出，无论是sub操、concat还是replace操作都不是在原有的字符串上进行的，而是重新生成了一个新的字符串对象。也就是说进行这些操作后，最原始的字符串并没有被改变。
+
+String对象创建之后就是固定不变的了，对String对象的任何改变不影响原对象，都会生成新对象。
+<h2 id="2.2">字符串常量池</h2>
+
+    String a = "hello";
+    String b = new ("hello");
+以上创建String对象的两种方式，
+
+第一种方式，存储在方法区的字符串常量池中。
+
+第二种方式，如果常量池中没有该字符串，先在方法区字符串常量池中创建对象，再将其拷贝至堆中。
+
+![图片](https://github.com/UMRhamster/Jobs2018/raw/master/java/img/string_create.png)
+
+在 Java 7 之前，字符串常量池被放在运行时常量池中，它属于永久代。而在 Java 7，字符串常量池被放在堆中。这是因为永久代的空间有限，在大量使用字符串的场景下会导致 OutOfMemoryError 错误。
+
+一道面试题：
+>String str = new String("abc"); 创建了几个对象?
+
+如果字符串常量池中没有"abc"，则创建两个对象，否则，创建一个对象。
+
+<h2 id="2.3">intern()</h2>
+
+当调用 intern() 方法时，编译器会将字符串添加到常量池中（stringTable维护），并返回指向该常量的引用。 
+    
+    String str2 = new String("str")+new String("01");
+    str2.intern();
+    String str1 = "str01";
+    System.out.println(str2==str1);
+在JDK 1.7下，当执行str2.intern();时，因为常量池中没有“str01”这个字符串，所以会在常量池中生成一个对堆中的“str01”的引用(注意这里是引用 ，就是这个区别于JDK 1.6的地方。在JDK1.6下是生成原字符串的拷贝)，而在进行String str1 = “str01”;字面量赋值的时候，常量池中已经存在一个引用，所以直接返回了该引用，因此str1和str2都指向堆中的同一个字符串，返回true。
+
+    String str2 = new String("str")+new String("01");
+    String str1 = "str01";
+    str2.intern();
+    System.out.println(str2==str1);
+将中间两行调换位置以后，因为在进行字面量赋值（String str1 = “str01″）的时候，常量池中不存在，所以str1指向的常量池中的位置，而str2指向的是堆中的对象，再进行intern方法时，对str1和str2已经没有影响了，所以返回false。
+
+[几张图轻松理解String.intern()](https://blog.csdn.net/soonfly/article/details/70147205)
+
+<h2 id="2.4">==和equals</h2>
+
+1. 对于==，如果作用于基本数据类型的变量（byte,short,char,int,long,float,double,boolean ），则直接比较其存储的"值"是否相等；如果作用于引用类型的变量（String），则比较的是所指向的对象的地址（即是否指向同一个对象）。
+
+2. equals方法是基类Object中的方法，因此对于所有的继承于Object的类都会有该方法。在Object类中，equals方法是用来比较两个对象的引用是否相等，即是否指向同一个对象。
+
+3. 对于equals方法，注意：equals方法不能作用于基本数据类型的变量。如果没有对equals方法进行重写，则比较的是引用类型的变量所指向的对象的地址；而String类对equals方法进行了重写，用来比较指向的字符串对象所存储的字符串是否相等。其他的一些类诸如Double，Date，Integer等，都对equals方法进行了重写用来比较指向的对象所存储的内容是否相等。
+
+<h2 id="2.5">String、StringBuilder、StringBuffer</h2>
+
+* String 是 Java 语言非常基础和重要的类，提供了构造和管理字符串的各种基本逻辑。它是典型的 Immutable 类，被声明成为 final class，所有属性也都是 final 的。也由于它的不可变性，类似拼接、裁剪字符串等动作，都会产生新的 String 对象。由于字符串操作的普遍性，所以相关操作的效率往往对应用性能有明显影响。
+
+* StringBuffer 是为解决上面提到拼接产生太多中间对象的问题而提供的一个类，我们可以用 append 或者 add 方法，把字符串添加到已有序列的末尾或者指定位置。StringBuffer 本质是一个线程安全的可修改字符序列，它保证了线程安全，也随之带来了额外的性能开销，所以除非有线程安全的需要，不然还是推荐使用它的后继者，也就是 StringBuilder。
+
+* StringBuilder 是 Java 1.5 中新增的，在能力上和 StringBuffer 没有本质区别，但是它去掉了线程安全的部分，有效减小了开销，是绝大部分情况下进行字符串拼接的首选。
