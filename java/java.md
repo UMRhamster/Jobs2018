@@ -8,6 +8,10 @@
   - [intern()](#2.3)
   - [==和equals](#2.4)
   - [String、StringBuilfer、StringBuffer](#2.5)
+* [三、Object](#3)
+  - [Object类的方法](#3.1)
+* [四、继承](#4)
+  - [访问权限](#4.1)
 <h1 id="1">一、数据类型</h1>
 <h2 id="1.1">基本数据类型及其包装类型</h2>
 <table>
@@ -314,3 +318,161 @@ String对象创建之后就是固定不变的了，对String对象的任何改�
 * StringBuffer 是为解决上面提到拼接产生太多中间对象的问题而提供的一个类，我们可以用 append 或者 add 方法，把字符串添加到已有序列的末尾或者指定位置。StringBuffer 本质是一个线程安全的可修改字符序列，它保证了线程安全，也随之带来了额外的性能开销，所以除非有线程安全的需要，不然还是推荐使用它的后继者，也就是 StringBuilder。
 
 * StringBuilder 是 Java 1.5 中新增的，在能力上和 StringBuffer 没有本质区别，但是它去掉了线程安全的部分，有效减小了开销，是绝大部分情况下进行字符串拼接的首选。
+
+<h1 id="3">三、Object</h1>
+<h2 id="3.1">Object类的方法</h2>
+
+Object是所有类的父类，任何类都默认继承Object。
+
+    public class Object {
+        private static native void registerNatives();
+        static {
+            registerNatives();
+        }
+
+    
+        public final native Class<?> getClass();
+
+    
+        public native int hashCode();
+
+    
+        public boolean equals(Object obj) {
+            return (this == obj);
+        }
+
+    
+        protected native Object clone() throws CloneNotSupportedException;
+
+    
+        public String toString() {
+            return getClass().getName() + "@" + Integer.toHexString(hashCode());
+        }
+
+    
+        public final native void notify();
+
+    
+        public final native void notifyAll();
+
+    
+        public final native void wait(long timeout) throws InterruptedException;
+
+    
+        public final void wait(long timeout, int nanos) throws InterruptedException {
+            if (timeout < 0) {
+                throw new IllegalArgumentException("timeout value is negative");
+            }
+
+            if (nanos < 0 || nanos > 999999) {
+                throw new IllegalArgumentException(
+                                "nanosecond timeout value out of range");
+            }
+
+            if (nanos > 0) {
+                timeout++;
+            }
+
+            wait(timeout);
+        }
+
+    
+        public final void wait() throws InterruptedException {
+            wait(0);
+        }
+
+    
+        protected void finalize() throws Throwable { }
+}
+
+
+1．clone方法
+保护方法，实现对象的浅复制，只有实现了Cloneable接口才可以调用该方法，否则抛出CloneNotSupportedException异常。
+
+2．getClass方法
+final方法，获得运行时类型。
+
+3．toString方法
+该方法用得比较多，一般子类都有覆盖。
+
+4．finalize方法
+该方法用于释放资源。因为无法确定该方法什么时候被调用，很少使用。
+
+5．equals方法
+该方法是非常重要的一个方法。一般equals和==是不一样的，但是在Object中两者是一样的。子类一般都要重写这个方法。
+
+6．hashCode方法
+该方法用于哈希查找，重写了equals方法一般都要重写hashCode方法。这个方法在一些具有哈希功能的Collection中用到。
+
+一般必须满足obj1.equals(obj2)==true。可以推出obj1.hash-Code()==obj2.hashCode()，但是hashCode相等不一定就满足equals。不过为了提高效率，应该尽量使上面两个条件接近等价。
+
+7．wait方法
+wait方法就是使当前线程等待该对象的锁，当前线程必须是该对象的拥有者，也就是具有该对象的锁。wait()方法一直等待，直到获得锁或者被中断。wait(longtimeout)设定一个超时间隔，如果在规定时间内没有获得锁就返回。
+
+调用该方法后当前线程进入睡眠状态，直到以下事件发生。
+
+（1）其他线程调用了该对象的notify方法。
+
+（2）其他线程调用了该对象的notifyAll方法。
+
+（3）其他线程调用了interrupt中断该线程。
+
+（4）时间间隔到了。
+
+此时该线程就可以被调度了，如果是被中断的话就抛出一个InterruptedException异常。
+
+8．notify方法
+该方法唤醒在该对象上等待的某个线程。
+
+9．notifyAll方法
+该方法唤醒在该对象上等待的所有线程。
+
+<h1 id="4">四、继承</h1>
+<h2 id="4.1">访问权限</h2>
+访问权限控制： 指的是本类及本类内部的成员（成员变量、成员方法、内部类）对其他类的可见性，即这些内容是否允许其他类访问。
+<table>
+<tr>
+<td>权限</td><td>类内</td><td>同包</td><td>不同包子类</td><td>不同包非子类</td>
+</tr>
+<tr>
+<td>private</td><td>√</td><td>×</td><td>×</td><td>×</td>
+</tr>
+<tr>
+<td>default</td><td>√</td><td>√</td><td>×</td><td>×</td>
+</tr>
+<tr>
+<td>protected</td><td>√</td><td>√</td><td>√</td><td>×</td>
+</tr>
+<tr>
+<td>public</td><td>√</td><td>√</td><td>√</td><td>√</td>
+</tr>
+</table>
+
+1. private：私有访问权限，被修饰的属性和方法只能被该类的对象访问。
+2. default：默认访问权限或包访问权限，只允许在同一个包中进行访问。
+3. protected：保护访问权限，被其修饰的属性和方法只能被类本身的方法及子类访问，即使子类在不同的包中也可以访问。
+4. public：公共访问权限，被其修饰的类、属性以及方法不仅可以跨类访问，而且允许跨包访问。
+
+<h2 id="4.2">使用场景</h2>
+
+1. 外部类的访问控制
+   
+   外部类（外部接口） 是相对于内部类（也称为嵌套类）、内部接口而言的。外部类的访问控制只能是这两种：public 、default 。
+
+2. 类里面的成员的访问控制
+   
+   类里面的成员分为三类 ： 成员变量、成员方法、成员内部类（内部接口）
+   
+   类里面的成员的访问控制可以是四种，也就是可以使用所有的访问控制权限。
+
+3. 抽象方法的访问权限
+   
+   普通方法是可以使用四种访问权限的，但抽象方法是有一个限制：不能用private 来修饰，也即抽象方法不能是私有的，否则，子类就无法继承实现抽象方法。
+4. 接口成员的访问权限
+   
+   接口由于其的特殊性，所有成员的访问权限都规定得死死的，下面是接口成员的访问权限：
+
+   * 变量： public static final
+   * 抽象方法： public abstract
+   * 静态方法： public static，JDK1.8后才支持
+   * 内部类、内部接口 ： public static
