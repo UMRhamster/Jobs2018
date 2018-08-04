@@ -12,6 +12,13 @@
   - [Object类的方法](#3.1)
 * [四、继承](#4)
   - [访问权限](#4.1)
+  - [抽象类与接口](#4.2)
+  - [super与this](#4.3)
+  - [重写与重载](#4.4)
+* [五、关键字](#5)
+  - [final](#5.1)
+  - [static](#5.2)
+  - [类初始化顺序](#5.3)
 <h1 id="1">一、数据类型</h1>
 <h2 id="1.1">基本数据类型及其包装类型</h2>
 <table>
@@ -429,6 +436,8 @@ wait方法就是使当前线程等待该对象的锁，当前线程必须是该�
 
 <h1 id="4">四、继承</h1>
 <h2 id="4.1">访问权限</h2>
+
+### 1.访问权限简介
 访问权限控制： 指的是本类及本类内部的成员（成员变量、成员方法、内部类）对其他类的可见性，即这些内容是否允许其他类访问。
 <table>
 <tr>
@@ -453,7 +462,7 @@ wait方法就是使当前线程等待该对象的锁，当前线程必须是该�
 3. protected：保护访问权限，被其修饰的属性和方法只能被类本身的方法及子类访问，即使子类在不同的包中也可以访问。
 4. public：公共访问权限，被其修饰的类、属性以及方法不仅可以跨类访问，而且允许跨包访问。
 
-<h2 id="4.2">使用场景</h2>
+### 2.访问权限使用场景
 
 1. 外部类的访问控制
    
@@ -476,3 +485,116 @@ wait方法就是使当前线程等待该对象的锁，当前线程必须是该�
    * 抽象方法： public abstract
    * 静态方法： public static，JDK1.8后才支持
    * 内部类、内部接口 ： public static
+
+<h2 id="4.2">抽象类与接口</h2>
+
+### 抽象类
+抽象类是不能实例化的类，用abstract关键字修饰class，其目的主要是代码宠用。除了不能实例化，形式上和一般的Java类并没有太大的区别，可以有一个或者多个抽象方法，也可以没有抽象方法。抽象类大多用于抽取相关Java类的共用方法实现或者是共同成员变量，然后通过继承的方法达到代码复用的目的。
+### 接口
+接口是对行为的抽象，它是抽象方法的集合，利用接口可以达到API定义和实现分离的目的。接口不能实例化；不能包含任何非常量成员，任何field都是隐含着public static final 的意义；同时，没有非静态方法实现，也就是说要么是抽象方法，要么是静态方法。
+### 区别
+
+1. Java 类继承 abstract class 使用 extends 关键字，实现 interface 使用 implements 关键字。
+2. Java 类只能继承一个 class ，但是可以实现多个 interface。
+3. 抽象类可以有构造器，而接口不能有构造器。
+4. 抽象类可以提供成员方法的实现细节，而接口中只能存在public abstract 方法；
+5. 抽象类中的成员变量可以是各种类型的，而接口中的成员变量只能是public static final类型的；
+
+<h2 id="4.3">super与this</h2>
+this是自身的一个对象，代表对象本身，可以理解为：指向对象本身的一个指针。
+
+super可以理解为是指向自己超（父）类对象的一个指针，而这个超类指的是离自己最近的一个父类。
+
+    class Country {
+        String name;
+
+        public Country(){}
+
+        public Country(String name){
+            this.name = name;   //通过this关键字区分形参与成员变量
+        }
+
+        void value() {
+            name = "China";
+        }
+    }
+  
+    class City extends Country {
+        String name;
+
+        public City(){
+            this("武汉");  //通过this()调用本类构造函数
+        }
+        public City(String name){
+            super(name);   //通过super()调用父类构造函数
+        }
+    
+        void value() {
+            name = "Shanghai";
+            super.value();      //通过super关键字调用父类的方法
+            System.out.println(name);
+            System.out.println(super.name);
+        }
+}
+
+<h2 id="4.4">重写与重载</h2>
+重写（Override）存在于继承体系中，在有一些子类要实现的方法中，方法名、传的参数、返回值跟父类中的方法一样，但具体实现又跟父类的不一样，这时候我们就需要重写父类的方法。
+
+    class Animal{
+        public call(){
+            System.out.println("Animal");
+        }
+    }
+
+    public class Cat extends Animal{
+        @Override
+        public void call() {
+            System.out.println("Cat");
+        }
+    }
+
+    public class Dog extends Animal{
+        @Override
+        public void call() {
+            System.out.println("Dog");
+        }
+    }
+
+注：java 5或者以前，必须一样，java 7 java 8可以不同，但是必须是父类返回值的派生类。
+
+重载（Overload）存在于同一个类中，指一个方法与已经存在的方法名称上相同，但是参数类型、个数、顺序至少有一个不同。应该注意的是，返回值不同，其它都相同不算是重载。
+
+    public class Compare{
+        public void max(int a, int b){
+            System.out.println(a>b?a:b);
+        }
+        public void max(float a, float b){
+            System.out.println(a>b?a:b);
+        }
+    }
+
+<h1 id="5">五、关键字</h1>
+<h2 id="5.1">final</h2>
+
+* 修饰基本数据类型，可以认为这些数据是常量，值是不可以再改变的。
+* 修饰引用类型,引用不可改变,即不能引用其它对象,对单对象内部属性是可以改变的。
+* 被final修饰的方法是不可以被子类重写的，但final修饰的方法可以被子类重载（不可覆盖，可被重载），可以被继承。
+* inal修饰的类不能被继承，且其中的方法也一定是final方法（默认），不会再有子类，例如String类。
+<h2 id="5.2">static</h2>
+
+* static修饰的成员变量称为静态变量，可以直接通过类名访问;在编译期就开辟了空间，且在内存中只有一份。其他的变量都叫做实例变量。
+* static 修饰方法，表示整个类的方法，不需要创建对象来调用，可以通过类名来调用。只能访问所属类的静态字段和静态方法，方法中不能有 this 和 super 关键字。
+* static 静态代码块，类中独立于成员变量和成员函数。用来初始化全局的变量，且只会在类初始化时执行一次。
+* 静态内部类：只能访问外部类的静态成员变量和静态方法。
+
+<h2 id="5.3">类初始化顺序</h2>
+
+1. 静态属性：static 开头定义的属性
+2. 静态方法块： static {} 圈起来的方法块
+3. 普通属性： 未带static定义的属性
+4. 普通方法块： {} 圈起来的方法块
+5. 构造函数： 类名相同的方法
+6. 方法： 普通方法
+
+   如果有继承关系，先初始化父类的静态属性和静态方法块，再初始化子类的静态属性和静态方法块，然后初始化父类的普通属性和普通方法块，以及构造函数,最后初始化子类的普通属性和普通方法块，以及构造函数。
+
