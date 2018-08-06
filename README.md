@@ -6,7 +6,8 @@
 
 >[计算机操作系统](https://github.com/UMRhamster/Jobs2018/blob/master/operating%20system/os.md)
 
-# 3. JAVA
+# 3. Java
 
->[JAVA基础](https://github.com/UMRhamster/Jobs2018/blob/master/java/java.md)
- 
+>[Java基础](https://github.com/UMRhamster/Jobs2018/blob/master/java/java.md)
+
+>[Java高级特性](https://github.com/UMRhamster/Jobs2018/blob/master/java/java_advanced.md)
