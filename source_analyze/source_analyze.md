@@ -27,7 +27,7 @@
 
 Java对数组的操作是指令级的，在一个数组对象上调用length，会被Java编译器编译成一条arraylength指令（Java   binary   code）。
 
-[java数组中的length属性到底属于java中的哪个类](#https://blog.csdn.net/jayzym/article/details/76643527)
+[java数组中的length属性到底属于java中的哪个类](https://blog.csdn.net/jayzym/article/details/76643527)
 
 <h2>链表</h2>
 链表是一种离散存储结构,用一组任意的存储单元存储数据（这些存储单元可以说是连续的，也可以是不连续的）。数据元素中的逻辑关系由节点中的指针指出,即每个数据元素都通过一个指针指向其下一个元素的地址。根据指针域的不同，链表又分为单链表、双向链表、循环链表等，这里我们只分析单链表。
