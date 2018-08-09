@@ -4,9 +4,8 @@
   - [List接口及其实现类](#1.1)
   - [Set接口及其实现类](#1.2)
   - [Map接口及其实现类](#1.3)
-* [二、集合源码分析](#2)
-  - [ArrayList源码分析](#2.1)
-  - [HashMap源码分析](#2.2)
+* [二、Java I/O](#2)
+  - [File类](#2.1)
 <h1 id="1">一、集合框架</h1>
 如果想要存储多个同类型的数据，可以使用数组来实现；但是使用数组存在一些明显的缺陷：
  
@@ -48,8 +47,96 @@ Map通过散列机制，提供key到value的映射。
 ### TreeMap
 底层是二叉树数据结构。线程不同步。可以用于给map集合中的键进行排序。
 
-<h1 id="2">二、集合源码分析</h1>
-<h2 id="2.1">ArrayList源码分析</h2>
+<h1 id="2">Java I/O</h1>
+
+java.io包提供了一些接口和类，对文件进行基本的操作，包括文件和目录属性的操作、对文件的读写的操作等等。
+<h2 id="2.1">File类</h2>
+File对象既可以表示文件，也可以表示目录，在程序中一个File对象可以代表一个文件或目录。利用它可用来对文件或目录进行基本操作。它可以查出与文件相关的信息，如名称、最后修改日期、文件大小等。
+
+### File类的构造方法
+（1）File(String pathname)
+
+用指定的文件路径来创建文件对象
+
+（2）File(String dir, String subpath);
+
+在指定的目录下创建指定文件名的文件对象；dir：指定目录路径；subpath：指定文件名
+
+（3）File(File parent, String subpath);
+
+根据一个文件对象和指定文件名创建文件对象；parent：指定目录文件；subpath：指定文件名
+
+### File类常用方法
+<table>
+<tr>
+<td>方法</td><td>说明</td>
+</tr>
+<tr>
+<td>boolean exists()</td><td>判断文件是否存在</td>
+</tr>
+<tr>
+<td>String getAbsolutePath()</td><td>返回此对象的文件的绝对路径</td>
+</tr>
+<tr>
+<td>String getName()</td><td>返回此对象表示的文件的名称</td>
+</tr>
+<tr>
+<td>String getParent()</td><td>返回此对象的路径名的上一级，如果没有上一级，则返回null;即返回文件所在目录的路径</td>
+</tr>
+<tr>
+<td>boolean delete()</td><td>删除此对象指定的文件</td>
+</tr>
+<tr>
+<td>boolean createNewFile()</td><td>创建空文件，不创建文件夹</td>
+</tr>
+<tr>
+<td>boolean isDirectory()</td><td>判断此对象表示的是否为目录</td>
+</tr>
+<tr>
+<td>boolean mkdir()</td><td>用于创建目录，其父目录必须由当前File对象指定</td>
+</tr>
+<tr>
+<td>boolean mkdirs()</td><td>用于创建目录，若父目录不存在，会自动创建</td>
+</tr>
+</table>
+
+    File directory = new File("C:\\Users\\12421\\Desktop\\test");  //先构造一个目录
+    directory.mkdirs();  //调用mkdirs()方法创建目录，包括其父目录
+    File file = new File(directory,"text.txt");  //由目剥文件对象和文件名创建文件对象
+    if (!file.exists()){  //判断文件是否存在，若不存在
+        try {
+            file.createNewFile();  //创建新文件
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    file.delete();  //调用delete()删除文件
+
+|
+
+|
+
+|
+
+|
+
+|
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h1 >二、集合源码分析</h1>
+<h2 >ArrayList源码分析</h2>
 
     public class ArrayList<E> extends AbstractList<E>
         implements List<E>, RandomAccess, Cloneable, java.io.Serializable
@@ -232,7 +319,7 @@ ArrayList实际上是一个动态数组，容量可以动态的增长，其继�
         size = 0;
     }
 
-<h2 id="2.2">HashMap源码分析</h2>
+<h2 >HashMap源码分析</h2>
 
 HashMap基于哈希表的 Map 接口的实现。此实现提供所有可选的映射操作，并允许使用 null 值和 null 键。（除了不同步和允许使用 null 之外，HashMap 类与 Hashtable 大致相同。）此类不保证映射的顺序，特别是它不保证该顺序恒久不变。
 
