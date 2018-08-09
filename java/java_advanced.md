@@ -6,6 +6,7 @@
   - [Map接口及其实现类](#1.3)
 * [二、Java I/O](#2)
   - [File类](#2.1)
+  - [Java的流](#2.2)
 <h1 id="1">一、集合框架</h1>
 如果想要存储多个同类型的数据，可以使用数组来实现；但是使用数组存在一些明显的缺陷：
  
@@ -102,7 +103,7 @@ File对象既可以表示文件，也可以表示目录，在程序中一个File
 
     File directory = new File("C:\\Users\\12421\\Desktop\\test");  //先构造一个目录
     directory.mkdirs();  //调用mkdirs()方法创建目录，包括其父目录
-    File file = new File(directory,"text.txt");  //由目剥文件对象和文件名创建文件对象
+    File file = new File(directory,"text.txt");  //由目录文件对象和文件名创建文件对象
     if (!file.exists()){  //判断文件是否存在，若不存在
         try {
             file.createNewFile();  //创建新文件
@@ -112,6 +113,182 @@ File对象既可以表示文件，也可以表示目录，在程序中一个File
     }
     file.delete();  //调用delete()删除文件
 
+<h2 id="2.2">Java的流</h2>
+File类能够对文件或目录的属性进行操作，但File类不能访问文件的内容，即不能从文件中读取数据或往文件里写数据。
+
+读文件是指把文件中的数据读取到内存中。写文件是指把内存中的数据写到文件中。Java中通过流来读写文件。
+
+流是指一连串流动的字符，是以先进先出的方式发送和接受数据的通道。
+
+[图片]
+
+### 分类
+#### 按方向分
+输入流和输出流
+
+输入/输出流是相对于计算机内存来说的，如果数据输入到内存，则称为输入流，如果从内存中输出则称为输出流。
+#### 按处理数据的单位分
+字节流和字符流；字节流读取的最小单位是一个字节（8位），字符流一次可以读取一个字符（16位Unicode字符）。
+#### 按照功能分
+节点流和处理流；节点流是直接从一个源读写数据的流（这个流没有经过包装和修饰），处理流是在对节点流封装的基础上的一种流。
+
+不管流的分类是多么的丰富和复杂，其根源来自于四个基本的抽象类。
+<table>
+<tr>
+<td></td><td>字节流</td><td>字符流</td>
+</tr>
+<tr>
+<td>输入流</td><td>InputStream</td><td>Reader</td>
+</tr>
+<tr>
+<td>输出流</td><td>OutputStream</td><td>Writer</td>
+</tr>
+</table>
+
+#### InputStream类的常用方法
+<table>
+<tr>
+<td>方法</td><td>说明</td>
+</tr>
+<tr>
+<td>int read()</td><td>从输入流中读取下一个字节数据</td>
+</tr>
+<tr>
+<td>int read(byte[] b)</td><td>从输入流中读取数据，并将数据存储在缓冲区数组b中，返回实际读取的字节数</td>
+</tr>
+<tr>
+<td>int read(byte[] b,int off, int len)</td><td>从输入流中读取最多len长度的字节，保存到字节数组b中，保存的位置从off开始</td>
+</tr>
+<tr>
+<td>void close()</td><td>关闭输入流</td>
+</tr>
+</table>
+
+#### OutputStream类的常用方法
+<table>
+<tr>
+<td>方法</td><td>说明</td>
+</tr>
+<tr>
+<td>int write(int c)</td><td>将指定的字节数据写入此输出流</td>
+</tr>
+<tr>
+<td>int write(byte[] buf)</td><td>将数组buf中的所有字节写入此输出流中</td>
+</tr>
+<tr>
+<td>int write(byte[] b,int off, int len)</td><td>将字节数组中从偏移量off开始的长度为len的字节数据输出到输出流中</td>
+</tr>
+<tr>
+<td>void close()</td><td>关闭输出流</td>
+</tr>
+</table>
+
+
+#### Reader类的常用方法
+<table>
+<tr>
+<td>方法</td><td>说明</td>
+</tr>
+<tr>
+<td>int read()</td><td>从输入流中读取单个字符，返回所读取的字符数据</td>
+</tr>
+<tr>
+<td>int read(char[] c)</td><td>从输入流中最多读取c.length个字符，保存到字符数组c中，返回实际读取的字符个数</td>
+</tr>
+<tr>
+<td>int read(char[] c,int off, int len)</td><td>从输入流中读取最多len个字符，保存到字符数组c中，保存的位置从off开始，返回实际读取的字符数</td>
+</tr>
+<tr>
+<td>void close()</td><td>关闭输入流</td>
+</tr>
+</table>
+
+#### Write类的常用方法
+<table>
+<tr>
+<td>方法</td><td>说明</td>
+</tr>
+<tr>
+<td>int write(String str)</td><td>将sre字符串里包含的字符输出到输出流中</td>
+</tr>
+<tr>
+<tr>
+<td>int write(String str,int off, int len)</td><td>将str字符串里从off位置开始，长度为len的多个字符输出到输出流中</td>
+</tr>
+<tr>
+<td>void close()</td><td>关闭输出流</td>
+</tr>
+<td>void flush()</td><td>刷新输出流</td>
+</tr>
+</table>
+
+<h2>读写文本文件</h2>
+
+1. 使用字节流读写文本文件
+   1. 使用FileInputStream读文本文件
+   
+      FileInputStream 称为文件输入流，它是字节输入流InputStream抽象类的一个子类,它的作用是将文件中的数据输入到内存中，可以利用它来读写文本文件中的数据。
+
+      FileInputStream(File file)&nbsp;&nbsp;&nbsp;&nbsp;//通过File对象指定文件，构造FileInputStream对象
+
+      FileInputStream(String name)&nbsp;&nbsp;&nbsp;&nbsp;//通过路径指定文件，构造FileInputStream对象
+
+          InputStream inputStream = new FileInputStream(new File("C:\\Users\\12421\\Desktop\\test.txt"));
+          int data = 0;
+          while((data = inputStream.read()) != -1){
+              System.out.print(data+" ");  //97 98 99
+              //应为read()方法返回的是int类型,对应字符的ASCII码，需要进行强制类型转换才能输出字符串。
+              System.out.print((char)data+" ");  //a b c
+          }
+          inputStream.close();
+    2. 使用FileOuputStream写文本文件
+
+       FileOutputStream 称为文件输出流，它是字节输出流OutputStream抽象类的子类，它的作用是把内存中的数据输出到文件中，可以利用它把内存中的数据写入到文本文件中。
+
+       FileOutputStream(File file)  //通过File对象指定文件，创建FileOutputStream对象
+
+       FileOutputStream(File file, boolean append)  //通过File对象指定文件，创建FileOutputStream对象，并指定是否以追加方式写入
+
+       FileOutputStream(String name)  //通过路径指定文件，创建FileOutputStream对象
+     
+       FileOutputStream(String name, boolean append)  //通过路径指定文件，创建FileOutputStream对象，并指定是否以追加方式写入
+
+           OutputStream outputStream = new FileOutputStream(new File("C:\\Users\\12421\\Desktop\\test.txt"));
+           outputStream.write("abc".getBytes());  //将字符串转换成字节数组
+           outputStream.close();
+
+2. 使用字符流读写文件
+   1. 使用BufferedReader和FileReader读文本文件
+      
+      BufferedReader和FileReader两个类都是Reader抽象类的子类，它们可以通过字符流的方式读取文件，并使用缓冲区，提高了读文本文件的效率。
+
+          FileReader fileReader = new FileReader("C:\\Users\\12421\\Desktop\\test.txt");
+          BufferedReader bufferedReader = new BufferedReader(fileReader);
+          String line = bufferedReader.readLine();  //读取一行数据
+          while(line!=null){
+              System.out.println(line);
+              line = bufferedReader.readLine();
+          }
+          bufferedReader.close();
+          fileReader.close();
+    2. 使用BufferedWriter和FileWriter写文本文件
+       
+       BufferedWriter和FileWriter都是字符流输出流Writer抽象类的子类，它们可以通过字符流的方式并通过缓冲区把数据写入文本文件，提高了写文本文件的效率。
+
+           FileWriter fileWriter = new FileWriter("C:\\Users\\12421\\Desktop\\test.txt");
+           BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
+           bufferedWriter.write("abc");
+           bufferedWriter.newLine();
+           bufferedWriter.flush();
+           bufferedWriter.close();
+           fileWriter.close();
+
+        在输出流在进行输出时，比如向某个文件中写入内容，其实是先将输出流写入到缓冲区，当缓冲区写满后才将缓冲区的内容输出到文件中。但是当主机完成输出流的输出后，有可能缓冲区这个时候还没有被填满，这样的话，就会一直等待主机发送内容，这时候，就可以使用flush将缓冲区的内容强制输出到文件中，清空缓冲区。 
+
+        close方法在关闭流时会同时刷新缓冲区。
+
+   
+   
 |
 
 |
