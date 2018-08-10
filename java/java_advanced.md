@@ -9,6 +9,7 @@
   - [Java的流](#2.2)
   - [读写文本文件](#2.3)
   - [序列化与反序列化](#2.4)
+* [三、反射](#3)
 <h1 id="1">一、集合框架</h1>
 如果想要存储多个同类型的数据，可以使用数组来实现；但是使用数组存在一些明显的缺陷：
  
@@ -243,7 +244,7 @@ File类能够对文件或目录的属性进行操作，但File类不能访问文
               System.out.print((char)data+" ");  //a b c
           }
           inputStream.close();
-    2. 使用FileOuputStream写文本文件
+    1. 使用FileOuputStream写文本文件
 
        FileOutputStream 称为文件输出流，它是字节输出流OutputStream抽象类的子类，它的作用是把内存中的数据输出到文件中，可以利用它把内存中的数据写入到文本文件中。
 
@@ -260,7 +261,7 @@ File类能够对文件或目录的属性进行操作，但File类不能访问文
            outputStream.close();
 
 2. 使用字符流读写文件
-   1. 使用BufferedReader和FileReader读文本文件
+   2. 使用BufferedReader和FileReader读文本文件
       
       BufferedReader和FileReader两个类都是Reader抽象类的子类，它们可以通过字符流的方式读取文件，并使用缓冲区，提高了读文本文件的效率。
 
@@ -273,7 +274,7 @@ File类能够对文件或目录的属性进行操作，但File类不能访问文
           }
           bufferedReader.close();
           fileReader.close();
-    2. 使用BufferedWriter和FileWriter写文本文件
+    1. 使用BufferedWriter和FileWriter写文本文件
        
        BufferedWriter和FileWriter都是字符流输出流Writer抽象类的子类，它们可以通过字符流的方式并通过缓冲区把数据写入文本文件，提高了写文本文件的效率。
 
@@ -354,6 +355,9 @@ Java中只有实现了 java.io.Serializable 接口的类的对象才能被序列
 * 如果一个类可以序列化，则它的父类要么是可序列化的，要么有无参构造函数；否则会抛出异常。
 * 如果一个类对象成员包含其他类的对象，当序列化此对象时，必须保证当前类和成员对象类都是可序列化的。
 * 序列化与反序列化时，必须要保证序列化ID一致。即 private static final long serialVersionUID 如果没有特殊需求，就是用默认的 1L 就可以。
+
+<h1>反射</h1>
+
 |
 
 |
