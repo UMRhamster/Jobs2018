@@ -356,6 +356,7 @@ Java中只有实现了 java.io.Serializable 接口的类的对象才能被序列
 * 如果一个类对象成员包含其他类的对象，当序列化此对象时，必须保证当前类和成员对象类都是可序列化的。
 * 序列化与反序列化时，必须要保证序列化ID一致。即 private static final long serialVersionUID 如果没有特殊需求，就是用默认的 1L 就可以。
 
+[Java中创建对象的5种方式](https://github.com/UMRhamster/Jobs2018/blob/master/wild_knowledge_point/about_java.md#1)
 <h1>反射</h1>
 
 |
