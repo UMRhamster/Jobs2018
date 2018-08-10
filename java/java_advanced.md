@@ -7,6 +7,8 @@
 * [二、Java I/O](#2)
   - [File类](#2.1)
   - [Java的流](#2.2)
+  - [读写文本文件](#2.3)
+  - [序列化与反序列化](#2.4)
 <h1 id="1">一、集合框架</h1>
 如果想要存储多个同类型的数据，可以使用数组来实现；但是使用数组存在一些明显的缺陷：
  
@@ -222,7 +224,7 @@ File类能够对文件或目录的属性进行操作，但File类不能访问文
 </tr>
 </table>
 
-<h2>读写文本文件</h2>
+<h2 id=“2.3”>读写文本文件</h2>
 
 1. 使用字节流读写文本文件
    1. 使用FileInputStream读文本文件
@@ -287,8 +289,71 @@ File类能够对文件或目录的属性进行操作，但File类不能访问文
 
         close方法在关闭流时会同时刷新缓冲区。
 
+<h2 id="2.4">序列化与反序列化</h2>
+
+### 序列化
+序列化就是将对象的状态存储到特定存储介质中的过程，也就是将对象状态转换为可保持或可传输格式的过程。在序列化过程中，会将对象的公有成员、私有成员包括类名，转换为字节流，然后再把字节流写入数据流，存储到存储介质中。
+
+
+使用序列化的意义在于将Java对象序列化之后，可以将其转换为字节序列，这些字节序列可以被保存在磁盘上，也可以借助网络进行传输，同时序列化后的对象保存的是二进制状态，这样实现了平台无关性。
+
+Java中只有实现了 java.io.Serializable 接口的类的对象才能被序列化，Serializable表示可串行的、可序列化的。JDK类库中，如String、包装类和Date类等都实现了Serializable接口。
    
-   
+    static class Student implements Serializable{  //注意实现Serializable，否则会产生java.io.NotSerializableException异常
+        String name;
+        public Student(String name){
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+    }
+
+    File directory = new File("C:\\Users\\12421\\Desktop\\test");
+        directory.mkdirs();
+        File file = new File(directory,"test.txt");
+        if (!file.exists()){
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            FileOutputStream fileOutputStream = new FileOutputStream(file);  //创建文件输出流
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(fileOutputStream);  //包装文件输出流，创建对象输出流
+            Student student = new Student("张三");  
+            objectOutputStream.writeObject(student);  //序列化对象
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+### 反序列化
+既然能够将对象的状态保存到存储介质中，那么如何将这些对象状态读取出来呢？这就用到反序列化。
+
+序列化就是将对象的状态信息保存到存储介质中，反序列化则是从特定的存储介质中读取数据并重新构建成对象的过程。通过反序列化，可以将存储在文件上的对象信息读取出来，然后重新构建为对象。这样就不需要再将文件上的信息一一读取、分析再组织为对象。
+
+    try {
+            FileInputStream fileInputStream = new FileInputStream(file);
+            ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream);
+            Student student = (Student) objectInputStream.readObject();  //通过readObject读取数据并创建对象，再强制类型转换为Student
+            System.out.println(student.getName());  //张三
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+通常，对象中的所有属性都会被序列化，但是对于一些比较敏感的信息，如用户的密码，一旦序列化后，人们完全可以通过读取文件或拦截网络传输出数据的方式获得这些信息。因此，可以通过使用transient修饰某些属性，限制被序列化。
+
+注：
+* 如果一个类可以序列化，则它的父类要么是可序列化的，要么有无参构造函数；否则会抛出异常。
+* 如果一个类对象成员包含其他类的对象，当序列化此对象时，必须保证当前类和成员对象类都是可序列化的。
+* 序列化与反序列化时，必须要保证序列化ID一致。即 private static final long serialVersionUID 如果没有特殊需求，就是用默认的 1L 就可以。
 |
 
 |
