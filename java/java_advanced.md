@@ -358,8 +358,62 @@ Java中只有实现了 java.io.Serializable 接口的类的对象才能被序列
 
 [Java中创建对象的5种方式](https://github.com/UMRhamster/Jobs2018/blob/master/wild_knowledge_point/about_java.md#1)
 <h1>反射</h1>
+<h2>认识反射</h2>
+反射是Java的特性之一，通过反射机制，可以在程序中访问已经装载到JVM中的Java对象的描述，实现访问、检测和修改Java对象本身信息的功能。反射机制是构建框架技术的基础所在。
 
-|
+反射即使是在运行状态中，动态的获取信息以及动态调用对象方法的功能。
+
+* 运行时生成对象实例
+* 运行时调用方法
+* 运行时更改属性
+
+<h2>Class类</h2>
+反射的核心类，反射的所有操作都是围绕该类来生成的。通过Class类，可以获取类的属性、方法的等内容信息。
+
+### 获取Class对象
+1. 调用对象的getClass()方法
+   
+   getClass()是java.lang.Object类中的一个方法，所有的Java对象都可以调用此方法，该方法会返回该对象所属类对应的Class对象。
+
+       Student student = new Student();
+       Class class = student.getClass();
+2. 调用Class的class属性
+
+   调用某个类的class属性可获取该类对应的Class对象，这种方式需要在编译期间就知道类的名称。
+
+       Class class = Student.class;
+3. 使用Class类的forName()静态方法
+
+   使用Class类的forName()静态方法也可以获取该类对应的Class对象。该方法需要传入字符串参数，该字符串参数的值是某个类的全名，即要在类名前添加完整的包名。
+
+       Class class = Class.forName("com.whut.umrhamster.Student");
+
+<h2>Constructor类</h2>
+类的构造方法，每个Constructor对象代表一个构造方法，利用Constructor对象可以操纵相应的构造方法。
+
+通过Class对象获取构造方法
+
+<table>
+<tr>
+<td>方法</td><td>说明</td>
+</tr>
+<tr>
+<td>Constructor getConstructor(Class...c)</td><td>返回此Class对象所包含的类的指定的public构造方法，c参数是按顺序声明的指定构造方法的参数的Class对象。例如 Constructor constructor = class.getConstructor(String.class,List.class);</td>
+</tr>
+<tr>
+<tr>
+<td>Constructor[] getConstructors()</td><td>返回此Class对象所包含的类的所有public构造方法</td>
+</tr>
+<tr>
+<td>Constructor getDeclaredConstructor(Class...c)</td><td>返回此Class对象所包含的类的指定的构造方法</td>
+</tr>
+<td>Constructor[] getDeclaredConstructor()</td><td>返回此对象所包含的类的所有构造方法</td>
+</tr>
+</table>
+
+<h2>Field类</h2>
+
+
 
 |
 
