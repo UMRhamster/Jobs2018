@@ -376,44 +376,94 @@ Java中只有实现了 java.io.Serializable 接口的类的对象才能被序列
    getClass()是java.lang.Object类中的一个方法，所有的Java对象都可以调用此方法，该方法会返回该对象所属类对应的Class对象。
 
        Student student = new Student();
-       Class class = student.getClass();
+       Class clazz = student.getClass();
 2. 调用Class的class属性
 
    调用某个类的class属性可获取该类对应的Class对象，这种方式需要在编译期间就知道类的名称。
 
-       Class class = Student.class;
+       Class clazz = Student.class;
 3. 使用Class类的forName()静态方法
 
    使用Class类的forName()静态方法也可以获取该类对应的Class对象。该方法需要传入字符串参数，该字符串参数的值是某个类的全名，即要在类名前添加完整的包名。
 
-       Class class = Class.forName("com.whut.umrhamster.Student");
+       Class clazz = Class.forName("com.whut.umrhamster.Student");
 
 <h2>Constructor类</h2>
 类的构造方法，每个Constructor对象代表一个构造方法，利用Constructor对象可以操纵相应的构造方法。
 
 通过Class对象获取构造方法
 
+Constructor getConstructor(Class<?>... parameterTypes)&nbsp;&nbsp;&nbsp;&nbsp;//返回此Class对象所包含的类的指定的public构造方法，parameterTypes参数是按顺序声明的指定构造方法的参数的Class对象。例如 Constructor constructor = class.getConstructor(String.class,List.class);
+
+Constructor[] getConstructors()&nbsp;&nbsp;&nbsp;&nbsp;//返回此Class对象所包含的类的所有public构造方法</td>
+
+Constructor getDeclaredConstructor(Class...c)&nbsp;&nbsp;&nbsp;&nbsp;//返回此Class对象所包含的类的指定的构造方法
+
+Constructor[] getDeclaredConstructor()&nbsp;&nbsp;&nbsp;&nbsp;//返回此对象所包含的类的所有构造方法
+
+通过上述方法获取Constructor对象后，可以使用Constructor对象创建对应类对象，可以调用带参构造函数。
+    
+    Class clazz =Student.class;
+    Constructor constructor = clazz.getConstructor(String.class); //获取参数只有一个String类型的构造方法
+    Student student = (Student) constructor.newInstance("张三"); //调用Constructor的newInstance()方法创建对象
+
+
+<h2>Field类</h2>
+类的成员变量，每个Field对象代表一个成员变量，利用Field对象可以操纵相应的成员变量。
+
+Field[] getFields()&nbsp;&nbsp;&nbsp;&nbsp;//返回所有public成员变量对应的Field对象
+
+Field getField(String name)&nbsp;&nbsp;&nbsp;&nbsp;//通过变量名返回对应public成员变量的Field对象
+
+Field[] getDeclaredFields()&nbsp;&nbsp;&nbsp;&nbsp;//返回所有成员变量，不限于public
+
+Field getDeclaredField(String name)&nbsp;&nbsp;&nbsp;&nbsp;//返回指定变量名的Field对象，不限于public
+
 <table>
 <tr>
 <td>方法</td><td>说明</td>
 </tr>
 <tr>
-<td>Constructor getConstructor(Class...c)</td><td>返回此Class对象所包含的类的指定的public构造方法，c参数是按顺序声明的指定构造方法的参数的Class对象。例如 Constructor constructor = class.getConstructor(String.class,List.class);</td>
+<td>xxx.getXxx(Object obj)</td><td>获得指定对象obj中成员变量的值，返回值为xxx，表示8种基本类类型</td>
 </tr>
 <tr>
 <tr>
-<td>Constructor[] getConstructors()</td><td>返回此Class对象所包含的类的所有public构造方法</td>
+<td>Object getObject(Object obj)</td><td>获得指定对象obj中成员变量的值，返回值为引用类型</td>
 </tr>
 <tr>
-<td>Constructor getDeclaredConstructor(Class...c)</td><td>返回此Class对象所包含的类的指定的构造方法</td>
+<td>void setXxx(Object obj.xxx val)</td><td>将obj对象的该属性设置成val值，Xxx表示8中基本类型</td>
 </tr>
-<td>Constructor[] getDeclaredConstructor()</td><td>返回此对象所包含的类的所有构造方法</td>
+<td>void set(Object obj,Object val)</td><td>将obj对象的该属性设置成val，使用引用类型</td>
+</tr>
+</tr>
+<td>void setAcessible(bool flag)</td><td>对获得到的属性设置访问权限，参数为true时，可对私有属性取值和赋值</td>
 </tr>
 </table>
 
-<h2>Field类</h2>
+    Student student = new Student("张三");
+    Class clazz =Student.class;
+    Field field = clazz.getDeclaredField("name"); //获取变量名为name的成员变量
+    field.setAccessible(true);  //设置允许对私有成员进行访问
+    field.set(student,"李四");  //将student对象对应的成员变量设置为 "李四"
+    field.get(student);  //获取student对象对应成员变量的值
 
+<h2>Method类</h2>
+每个Method对象代表一个方法，利用Method对象可以操纵相应的方法。
 
+Method[] getMethods()&nbsp;&nbsp;&nbsp;&nbsp;//返回所有public方法
+
+Method method getMethod(String name, Class<?>... parameterTypes)&nbsp;&nbsp;&nbsp;&nbsp;//返回指定方法名与参数类型的方法
+
+Method[] getDeclaredMethods()&nbsp;&nbsp;&nbsp;&nbsp;//返回所有方法，不限于public
+
+Method getDeclaredMethod(String name, Class<?>... parameterTypes)&nbsp;&nbsp;&nbsp;&nbsp;//返回指定方法名与参数类型的方法,不限于public
+
+方法是用来被执行的，所以Mehod中最常用的方法就是 invoke(Obejct obj,Object...args) 该方法表示利用指定参数args执行obj对象的该方法。
+
+    Student student = new Student("张三");
+    Class clazz =Student.class;
+    Method method = clazz.getDeclaredMethod("setName",String.class);  //获取方法名为setName,方法参数为一个String类型的方法
+    method.invoke(student,"李四");  //利用该method将student对象的name修改为 "李四"
 
 |
 
