@@ -10,6 +10,14 @@
   - [读写文本文件](#2.3)
   - [序列化与反序列化](#2.4)
 * [三、反射](#3)
+  - [Class类](#3.1)
+  - [Constructor类](#3.2)
+  - [Field类](#3.3)
+  - [Method类](#3.4)
+* [四、注解](#4)
+  - [元注解](#4.1)
+  - [自定义注解](#4.2)
+  - [读取注解信息](#4.3)
 <h1 id="1">一、集合框架</h1>
 如果想要存储多个同类型的数据，可以使用数组来实现；但是使用数组存在一些明显的缺陷：
  
@@ -357,8 +365,7 @@ Java中只有实现了 java.io.Serializable 接口的类的对象才能被序列
 * 序列化与反序列化时，必须要保证序列化ID一致。即 private static final long serialVersionUID 如果没有特殊需求，就是用默认的 1L 就可以。
 
 [Java中创建对象的5种方式](https://github.com/UMRhamster/Jobs2018/blob/master/wild_knowledge_point/about_java.md#1)
-<h1>反射</h1>
-<h2>认识反射</h2>
+<h1 id="3">反射</h1>
 反射是Java的特性之一，通过反射机制，可以在程序中访问已经装载到JVM中的Java对象的描述，实现访问、检测和修改Java对象本身信息的功能。反射机制是构建框架技术的基础所在。
 
 反射即使是在运行状态中，动态的获取信息以及动态调用对象方法的功能。
@@ -367,7 +374,7 @@ Java中只有实现了 java.io.Serializable 接口的类的对象才能被序列
 * 运行时调用方法
 * 运行时更改属性
 
-<h2>Class类</h2>
+<h2 id="3.1">Class类</h2>
 反射的核心类，反射的所有操作都是围绕该类来生成的。通过Class类，可以获取类的属性、方法的等内容信息。
 
 ### 获取Class对象
@@ -388,7 +395,7 @@ Java中只有实现了 java.io.Serializable 接口的类的对象才能被序列
 
        Class clazz = Class.forName("com.whut.umrhamster.Student");
 
-<h2>Constructor类</h2>
+<h2 id="3.2">Constructor类</h2>
 类的构造方法，每个Constructor对象代表一个构造方法，利用Constructor对象可以操纵相应的构造方法。
 
 通过Class对象获取构造方法
@@ -408,7 +415,7 @@ Constructor[] getDeclaredConstructor()&nbsp;&nbsp;&nbsp;&nbsp;//返回此对象�
     Student student = (Student) constructor.newInstance("张三"); //调用Constructor的newInstance()方法创建对象
 
 
-<h2>Field类</h2>
+<h2 id="3.3">Field类</h2>
 类的成员变量，每个Field对象代表一个成员变量，利用Field对象可以操纵相应的成员变量。
 
 Field[] getFields()&nbsp;&nbsp;&nbsp;&nbsp;//返回所有public成员变量对应的Field对象
@@ -447,7 +454,7 @@ Field getDeclaredField(String name)&nbsp;&nbsp;&nbsp;&nbsp;//返回指定变量�
     field.set(student,"李四");  //将student对象对应的成员变量设置为 "李四"
     field.get(student);  //获取student对象对应成员变量的值
 
-<h2>Method类</h2>
+<h2 id="3,4">Method类</h2>
 每个Method对象代表一个方法，利用Method对象可以操纵相应的方法。
 
 Method[] getMethods()&nbsp;&nbsp;&nbsp;&nbsp;//返回所有public方法
@@ -464,6 +471,79 @@ Method getDeclaredMethod(String name, Class<?>... parameterTypes)&nbsp;&nbsp;&nb
     Class clazz =Student.class;
     Method method = clazz.getDeclaredMethod("setName",String.class);  //获取方法名为setName,方法参数为一个String类型的方法
     method.invoke(student,"李四");  //利用该method将student对象的name修改为 "李四"
+
+<h1 id="4">注解</h1>
+Java注解也就是Annotation，是Java代码里的特殊标记，为Java程序提供了一种形式化的方法，用来表达额外的信息。可用于类、方法、成员变量、参数等，注解不会影响程序的执行。
+
+注解需要置于所有修饰符前，并且一般单独置于一行。
+
+最常见的注解是 @Override ，它用来标注方法，表示该方法是重写父类的方法。
+
+    public class MyThread extends Thread{
+        @Override
+        public void run() {
+            super.run();
+        }
+    }
+
+
+上述代码Mythread类继承了线程类Thread，其中的run()方法被标注了Override表示重写父类run方法。
+
+<h2 id="4.1">元注解</h2>
+java.lang.annotation包下提供了4个元注解，他们用来修饰其他的注解定义，分别是 @Target 注解、 @Retention 注解、 @Documented 注解以及 @Inherited 注解。
+
+### @Target 注解
+@Target 注解用于指定被前期修饰的注解能用于修饰那些程序元素，@Target 注解类型有唯一的value作为成员变量。这个成员变量是java.lang.annitation.ElementType类型。value值指定了被修饰的注解只能按如下声明进行标注。
+
+ElementType.ANNOTATION_TYPE：注解声明<br/>
+ElementType.CONSTRUCTOR：构造方法声明<br/>
+ElementType.FIELD：成员变量声明<br/>
+ElementType.LOCAL_VARIABLE：局部变量声明<br/>
+ElementType.METHOD：方法声明<br/>
+ElementType.PACKAGE：包声明<br/>
+ElementType.PARAMETER：参数声明<br/>
+ElementType.TYPE：类、接口（包括注解类型）或枚举类型
+
+### @Retention 注解
+@Retention 注解描述了被其修饰的注解是否被编译器丢弃或者保留在class文件中。默认情况下，注解被保存在class文件中，但是运行是并不能被反射访问。
+
+@Retention 包含一个RetentionPolicy 类型的value成员变量，取值如下
+
+RetentionPolicy.CLASS：默认值，便是编译器会把被修饰的注解记录在class文件中，但当运行Java程序时，Java虚拟机会保留注解，从而无法通过反射对注解进行访问。<br/>
+RetentionPolicy.RUNTIME：表示编译器将注解记录在class文件中，当运行java文件时，Java虚拟机会保留注解，程序可以通过反射获取该注解。<br/>
+RetentionPolicy.SOURCE：表示编译器将直接丢弃被修饰的注解。
+
+### @Documented 注解
+@Documented用于指定被其修饰的注解将被JavaDoc工具提取成文档。
+### @Inherited 注解
+@Inherited 注解用于指定被其修饰的注解将具有继承性。也就是说，如果一个使用了@Inherited注解修饰的注解被用于某个类，则这个注解也将被用于该类的子类。
+<h2 id="4.2">自定义注解</h2>
+注解类型是一种接口，但它又不同于接口。定义一个新的注解类型与定义一个接口非常相似，定义新的注解类型要使用@Interface关键字。
+
+参数成员只能用public或默认(default)这两个访问权修饰<br/>
+参数成员只能用基本类型byte,short,char,int,long,float,double,boolean八种基本数据类型和String、Enum、Class、annotations等数据类型,以及这一些类型的数组.
+
+    @Target(FIELD)
+    @Retention(RUNTIME)
+    @Documented
+    public @interface NickName {
+        String value() default "";
+    }
+
+[自定义注解实例——实现ORM映射](https://blog.csdn.net/jstxzhangrui/article/details/52976953)
+<h2 id="4.3">读取注解信息</h2>
+java.lang.reflect包提供了对读取运行时注解的支持。java.lang.reflect包下的AnnotatedAlement接口代表程序中可以接收注解的程序元素，其中Class类、Constructor类、Field类、Method类、Package类都实现了此接口。
+
+AnnotatedElement有如下3个方法来访问注解信息
+
+getAnnotation()&nbsp;&nbsp;&nbsp;&nbsp; //用于返回该程序元素上存在的、指定类型的注解，如果该类型的注解不存在，则返回null<br/>
+getAnnotations()&nbsp;&nbsp;&nbsp;&nbsp;//用来返回该程序元素上存在的所有注解<br/>
+isAnnotationPresent()&nbsp;&nbsp;&nbsp;&nbsp;//用于判断该程序元素上是否存在指定类型的注解。
+
+注：只有被@Retention(RetentionPolicy.RUNTIME)修饰的注解，才能在运行时被获取到。
+
+
+
 
 |
 
