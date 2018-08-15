@@ -21,6 +21,7 @@
 * [五、多线程](#5)
   - [线程使用](#5.1)
   - [选择](#5.2)
+  - [线程池](#5.3)
 * [六、并发](#6)
   - [synchronized 关键字](#6.1)
 <h1 id="1">一、集合框架</h1>
@@ -605,13 +606,178 @@ Java中有3种方式可以定义线程类，分别是继承java.lang.Thread、�
         System.out.println(ft.get());
     }
 
-<h2="5.2">选择</h2>
+<h2 id="5.2">选择</h2>
 
 * Java不支持多继承，继承了Thread类就无法继承其它类，但是可以实现多个接口。
 * Callable接口有返回值，并且call()方法可以抛出异常，run()方法不能抛出异常。
+  
+<h2 id="5.3">线程池</h2>
+如果我们在使用线程的时候就去创建一个线程，虽然这然实现起来很简单，但是如果并发线程的数量很多，并且每个线程都执行一个时间很短的任务就结束了，这样频繁的创建线程就会降低系统的效率，因为创建和销毁线程都需要时间。
 
-<h1>六、并发</h1>
-<h2>synchronized 关键字</h2>
+通过线程池，可以使得线程复用，就是执行完一个任务之后，并不被销毁,而是去继续执行其他任务。
+### ThreadPoolExecutor类
+java.uitl.concurrent.ThreadPoolExecutor类是线程池中最核心的一个类。
+
+ThreadPoolExecutor类中提供了四个构造方法：
+
+    public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue<Runnable> workQueue) {
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
+             Executors.defaultThreadFactory(), defaultHandler);
+    }
+
+    public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue<Runnable> workQueue,
+                              ThreadFactory threadFactory) {
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
+             threadFactory, defaultHandler);
+    }
+
+    public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue<Runnable> workQueue,
+                              RejectedExecutionHandler handler) {
+        this(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue,
+             Executors.defaultThreadFactory(), handler);
+    }
+
+    public ThreadPoolExecutor(int corePoolSize,
+                              int maximumPoolSize,
+                              long keepAliveTime,
+                              TimeUnit unit,
+                              BlockingQueue<Runnable> workQueue,
+                              ThreadFactory threadFactory,
+                              RejectedExecutionHandler handler) {
+        if (corePoolSize < 0 ||
+            maximumPoolSize <= 0 ||
+            maximumPoolSize < corePoolSize ||
+            keepAliveTime < 0)
+            throw new IllegalArgumentException();
+        if (workQueue == null || threadFactory == null || handler == null)
+            throw new NullPointerException();
+        this.corePoolSize = corePoolSize;
+        this.maximumPoolSize = maximumPoolSize;
+        this.workQueue = workQueue;
+        this.keepAliveTime = unit.toNanos(keepAliveTime);
+        this.threadFactory = threadFactory;
+        this.handler = handler;
+    }
+
+从上面的构造方法可以看出前面3个构造方法都是调用第四个构造方法进行初始化的。
+
+* corePoolSize：线程池核心线程数
+* maximumPoolSize；线程池的最大线程数
+* keepAliveTime：非核心线程闲置时的超时时长，超过这个时长，非核心线程就会被回收。
+* unit：keepAliveTime 参数的时间单位
+* workQueue：一个阻塞队列，用来存储等待执行的任务
+* threadFactory：执行程序创建新线程时使用的工厂。
+* handler：表示当拒绝处理任务时的策略，有以下四种策略：
+  
+  ThreadPoolExecutor.AbortPolicy:丢弃任务并抛出RejectedExecutionException异常。<br/>
+ThreadPoolExecutor.DiscardPolicy：也是丢弃任务，但是不抛出异常。<br/> 
+ThreadPoolExecutor.DiscardOldestPolicy：丢弃队列最前面的任务，然后重新尝试执行任务（重复此过程）<br/>
+ThreadPoolExecutor.CallerRunsPolicy：由调用线程处理该任务 <br/>
+
+注：
+1. 如果线程池中的线程数量未达到核心线程的数量，那么会直接启动一个核心线程来执行任务；
+2. 如果线程池中的线程数量已经达到或者超过核心线程的数量，那么任务会被插入到阻塞队列中排队等待执行；
+3. 如果中无法将任务插入到阻塞队列中，这往往是由于阻塞队列已满，这个时候如果线程数量未达到线程池规定的最大值，那么会立刻启动一个非核心线程来执行。
+4. 如果线程数量已经达到线程池规定的最大值，那么就拒绝执行此任务，根据策略做出响应
+   
+示例： 
+
+    public class TestRunnable implements Runnable{
+        @Override
+        public void run() {
+            System.out.println(Thread.currentThread().getName()+"：正在执行");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(Thread.currentThread().getName()+"：执行完毕");
+        }
+    }
+
+    public static void main(String[] args) {
+        ThreadPoolExecutor poolExecutor = new ThreadPoolExecutor(5,10,0,TimeUnit.MILLISECONDS,new ArrayBlockingQueue<>(5));
+        for (int i=0;i<15;i++){
+            TestRunnable runnable = new TestRunnable();
+            poolExecutor.execute(runnable);
+            System.out.println("线程池中线程数目："+poolExecutor.getPoolSize()+"，队列中等待执行的任务数目："+
+                    poolExecutor.getQueue().size()+"，已执行玩别的任务数目："+poolExecutor.getCompletedTaskCount());
+        }
+        poolExecutor.shutdown();
+    }
+
+结果：
+
+    pool-1-thread-1：正在执行
+    线程池中线程数目：1，队列中等待执行的任务数目：0，已执行玩别的任务数目：0
+    线程池中线程数目：2，队列中等待执行的任务数目：0，已执行玩别的任务数目：0
+    线程池中线程数目：3，队列中等待执行的任务数目：0，已执行玩别的任务数目：0
+    pool-1-thread-2：正在执行
+    pool-1-thread-3：正在执行
+    线程池中线程数目：4，队列中等待执行的任务数目：0，已执行玩别的任务数目：0
+    pool-1-thread-4：正在执行
+    线程池中线程数目：5，队列中等待执行的任务数目：0，已执行玩别的任务数目：0
+    pool-1-thread-5：正在执行
+    线程池中线程数目：5，队列中等待执行的任务数目：1，已执行玩别的任务数目：0
+    线程池中线程数目：5，队列中等待执行的任务数目：2，已执行玩别的任务数目：0
+    线程池中线程数目：5，队列中等待执行的任务数目：3，已执行玩别的任务数目：0
+    线程池中线程数目：5，队列中等待执行的任务数目：4，已执行玩别的任务数目：0
+    线程池中线程数目：5，队列中等待执行的任务数目：5，已执行玩别的任务数目：0
+    线程池中线程数目：6，队列中等待执行的任务数目：5，已执行玩别的任务数目：0
+    pool-1-thread-6：正在执行
+    线程池中线程数目：7，队列中等待执行的任务数目：5，已执行玩别的任务数目：0
+    pool-1-thread-7：正在执行
+    线程池中线程数目：8，队列中等待执行的任务数目：5，已执行玩别的任务数目：0
+    线程池中线程数目：9，队列中等待执行的任务数目：5，已执行玩别的任务数目：0
+    pool-1-thread-8：正在执行
+    pool-1-thread-9：正在执行
+    线程池中线程数目：10，队列中等待执行的任务数目：5，已执行玩别的任务数目：0
+    pool-1-thread-10：正在执行
+    pool-1-thread-2：执行完毕
+    pool-1-thread-1：执行完毕
+    pool-1-thread-1：正在执行
+    pool-1-thread-2：正在执行
+    pool-1-thread-6：执行完毕
+    pool-1-thread-3：执行完毕
+    pool-1-thread-3：正在执行
+    pool-1-thread-7：执行完毕
+    pool-1-thread-4：执行完毕
+    pool-1-thread-7：正在执行
+    pool-1-thread-6：正在执行
+    pool-1-thread-5：执行完毕
+    pool-1-thread-9：执行完毕
+    pool-1-thread-8：执行完毕
+    pool-1-thread-10：执行完毕
+    pool-1-thread-1：执行完毕
+    pool-1-thread-2：执行完毕
+    pool-1-thread-6：执行完毕
+    pool-1-thread-3：执行完毕
+    pool-1-thread-7：执行完毕
+
+创建了一个核心线程数为5，最大线程数为10，阻塞队列为5的线程池。通过执行结果，可以发现线程名最大为10，而我们创建了15个任务，其中5个任务对线程进行了复用。
+
+### 四种线程池
+java.util.concurrent.Executors工厂类可以创建四种类型的线程池，通过Executors.newXXX方法即可创建。
+
+newCachedThreadPool创建一个可缓存线程池，如果线程池长度超过处理需要，可灵活回收空闲线程，若无可回收，则新建线程。<br/>
+newFixedThreadPool 创建一个定长线程池，可控制线程最大并发数，超出的线程会在队列中等待。<br/>
+newScheduledThreadPool 创建一个定长线程池，支持定时及周期性任务执行。<br/>
+newSingleThreadExecutor 创建一个单线程化的线程池，它只会用唯一的工作线程来执行任务，保证所有任务按照指定顺序(FIFO, LIFO, 优先级)执行。<br/>
+
+<h1 id="6">六、并发</h1>
+<h2 id="6.1">synchronized 关键字</h2>
 synchronized 关键字在需要原子性、可见性和有序性这三种特性的时候都可以作为其中一种解决方案，看起来是"万能"的。的确，大部分并发控制操作都能使用synchronized来完成。
 
 ### synchronized的用法
