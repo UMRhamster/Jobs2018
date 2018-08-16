@@ -24,5 +24,8 @@
 # 7.源码分析
 >[Java集合](https://github.com/UMRhamster/Jobs2018/blob/master/source_analyze/source_analyze.md)
 
-# 8.野生知识点
+# 8.设计模式
+>[设计模式](https://github.com/UMRhamster/Jobs2018/blob/master/design_pattern/design_pattern.md)
+
+# 9.野生知识点
 > [Java相关](https://github.com/UMRhamster/Jobs2018/blob/master/wild_knowledge_point/about_java.md)
