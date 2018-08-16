@@ -19,7 +19,7 @@
         for(int i=0;i<a.length-1;i++){  //外层循环控制循环次数
             int min = i;
             for(int j=i+1;j<a.length;j++){   //内层循环选择出未排序元素中最小元素的序号
-                if(a[j] < min){
+                if(a[j] < a[min]){
                     min = j;
                 }
             }
