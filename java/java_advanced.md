@@ -9,6 +9,7 @@
   - [Java的流](#2.2)
   - [读写文本文件](#2.3)
   - [序列化与反序列化](#2.4)
+  - [NIO](#2.5)
 * [三、反射](#3)
   - [Class类](#3.1)
   - [Constructor类](#3.2)
@@ -372,6 +373,38 @@ Java中只有实现了 java.io.Serializable 接口的类的对象才能被序列
 * 序列化与反序列化时，必须要保证序列化ID一致。即 private static final long serialVersionUID 如果没有特殊需求，就是用默认的 1L 就可以。
 
 [Java中创建对象的5种方式](https://github.com/UMRhamster/Jobs2018/blob/master/wild_knowledge_point/about_java.md#1)
+<h2>NIO</h2>
+jdk1.4中新加入了NIO( New Input/ Output) 类，引入了一种基于通道和缓冲区的 I/O 方式，它可以使用 Native 函数库直接分配堆外内存，然后通过一个存储在 Java 堆的 DirectByteBuffer 对象作为这块内存的引用进行操作，避免了在 Java 堆和 Native 堆中来回复制数据。
+
+NIO 是一种同步非阻塞的 IO 模型。同步是指线程不断轮询 IO 事件是否就绪，非阻塞是指线程在等待 IO 的时候，可以同时做其他任务。同步的核心就是 Selector，Selector 代替了线程本身轮询 IO 事件，避免了阻塞同时减少了不必要的线程消耗；非阻塞的核心就是通道和缓冲区，当 IO 事件就绪时，可以通过写道缓冲区，保证 IO 的成功，而无需线程阻塞式地等待。
+
+Java NIO 由以下几个核心部分组成：
+* Channel
+* Buffer
+* Selector
+
+### Channel
+Channel有点像流，数据可以从通道读取，也可以向通道写入数据。但是读取和写入都必须使用Buffer。
+
+通道类型：
+* FileChannel 文件IO
+* DatagramChannel UDP传输
+* SocketChannel TCP传输
+* ServerSocketChannel TCP传输
+### Buffer
+缓冲区可以认为是一个数据容器，可以理解为一个基本数据类型数组，如字节数组等；NIO中任何数据输入/输出都是必须经由缓冲区实现
+
+缓冲区类型：
+* ByteBuffer 
+* CharBuffer 
+* ShortBuffer 
+* IntBuffer 
+* LongBuffer 
+* FloatBuffer 
+* DoubleBuffer 
+* MappedByteBuffer （内存映射文件）
+### Selector
+选择器支持单个线程处理多个Channel，将多个Channel注册到一个选择器中，选择器基于事件的方式处理；从选择器获取注册Channel中关注的事件（如读、写）并进行数据处理，非常适用于多个数据量不大、读写不频繁的通道，使用单个线程来处理； 
 <h1 id="3">反射</h1>
 反射是Java的特性之一，通过反射机制，可以在程序中访问已经装载到JVM中的Java对象的描述，实现访问、检测和修改Java对象本身信息的功能。反射机制是构建框架技术的基础所在。
 
