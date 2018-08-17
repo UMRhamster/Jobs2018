@@ -71,6 +71,8 @@ java的设计模式大体上分为三类：
 
 饿汉式由于提前实例化，就不会出现多线程下的线程安全问题。
 
+[synchronized 关键字](https://github.com/UMRhamster/Jobs2018/blob/master/java/java_advanced.md#6.2)
+
 但是无论是对方法进行加锁，还是对代码块进行加锁，我们都只是希望在newSingleton()的时候进行加锁，即只在第一次创建对象时防止线程安全问题。因此这种写法效率不是很高。
 
 ### 双重加锁机制
@@ -91,6 +93,7 @@ java的设计模式大体上分为三类：
             return instance;
         }
     }
+[volatile 关键字](https://github.com/UMRhamster/Jobs2018/blob/master/java/java_advanced.md#6.3)
 
 ### 静态内部类的单例模式
 
