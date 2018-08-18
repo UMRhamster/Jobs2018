@@ -25,7 +25,7 @@ java的设计模式大体上分为三类：
 
 常见单例模式有两种创建方式：懒汉式与饿汉式。
 
-1. 懒汉式
+### 懒汉式
    
    顾名思义，就是在需要的时候才去创建对象，懒汉式不会在类加载时就创建对象，而是在第一次使用时才会创建对象。
        
@@ -42,7 +42,7 @@ java的设计模式大体上分为三类：
                return instance;
            }
        }
-2. 饿汉式
+### 饿汉式
    
    饿汉式则会在类加载的时候就创建对象。
 
@@ -120,6 +120,193 @@ java的设计模式大体上分为三类：
     //通过 Singleton.INSTANCE.doSomething()进行调用
 
 枚举类的构造方法是私有的；每个枚举实例默认都是static final的，即只能被实例化一次。
+
+### 静态成员与单例模式
+* 单例更符合面向对象,静态成员破坏面向对象；
+* 单例对象存储在堆内存，静态成员存储在方法区。
+
+<h2>工厂模式</h2>
+
+### 简单工厂模式
+
+    //Fruit接口，并定义抽象方法用于返回水果名
+    public interface Fruit{
+        String getName();
+    }
+
+    //创建Apple类实现Fruit接口，并重写getName()方法
+    public Apple implements Fruit{
+        @Override
+        public String getName(){
+            return "Apple";
+        } 
+    }
+
+    //Banana类实现Fruit接口，并重写getName()方法
+    public Banana implements Fruit{
+        @Override
+        public String getName(){
+            return "Banana";
+        } 
+    }
+
+    //水果工厂类FruitFactory,用于创建并返回具体水果类
+    public class FruitFactory{
+
+        public static Fruit getFruit(String name){
+            if("Apple".equals(name)){
+                return new Apple();
+            }else if("Banana".equals(name)){
+                return new Banana();
+            }else{
+                return null;
+            }
+        }
+    }
+
+    public class Main{
+        public static main(String[] args){
+            Fruit fruit1 = FruitFactory.getFruit("Apple");
+            Fruit fruit2 = FruitFactory.getFruit("Banana");
+
+            fruit1.getName();  //Apple
+            fruit2.getName();  //Banana
+        }
+    }
+
+注意：以上class均属于不同java文件，一个java文件中只能存在一个pulic外部类。
+
+* 简单工厂模式也叫静态工厂模式，工厂类一般使用静态方法，根据接收参数的不同返回不同的对象。
+* 对于新的水果类加入，需要修改工厂类代码
+* 不完全满足开闭原则
+
+### 工厂方法模式
+
+    //水果接口以及说水果具体实现类不作修改，这里不再重复
+    //...
+
+    //水果工厂接口
+    public interface FruitFactory{
+        Fruit getFruit();
+    }
+
+    //苹果工厂，专门用于获取苹果
+    public interface AppleFactory implements FruitFactory{
+        @Override
+        public Fruit getFruit(){
+            return new Apple();
+        }
+    }
+
+    //香蕉工厂，专门用于获取香蕉
+    public interface BananaFactory implements FruitFactory{
+        @Override
+        public Fruit getFruit(){
+            return new Banana();
+        }
+    }
+
+    public class Main{
+        public static main(String[] args){
+            Fruit fruit1 = new AppleFactory().getFruit();
+            Fruit fruit2 = new BananaFactory().getFruit();
+
+            fruit1.getName();  //Apple
+            fruit2.getName();  //Banana
+        }
+    }
+注意：以上class均属于不同java文件，一个java文件中只能存在一个pulic外部类。
+
+* 工厂方法模式定义了一个创建对象的接口，但由子类决定要实例化哪一个。工厂方法让类把实例化推迟到了子类。
+* 工厂方法模式更符合开闭原则，但是每次增加新的水果类，同时会增加新的对应工厂类。
+
+### 抽象工厂模式
+为创建一组相关或相互依赖的对象提供一个接口，而且无需指定他们的具体类。
+
+如果除了水果，我们还需要甜点，按照工厂方法模式，除了甜点接口以及实现类，还需要增加以一个抽象工厂和多个具体实现工厂。随着产品的增多，类会越来越多。
+
+    //水果接口以及说水果具体实现类不作修改，这里不再重复
+    //...
+
+    //水果工厂接口及具体实现工厂类也不作修改，不再重复
+    //..
+
+    //新增甜点
+    public interface Dessert{
+        String taste();
+    }
+
+    //甜点具体实现类，BlackForestCake
+    public class BlackForestCake implements Dessert{
+
+        @Override
+        public String taste(){
+            return "delicious";
+        }
+    }
+
+    //甜点具体实现类，Tiramisu
+    public class Tiramisu implements Dessert{
+
+        @Override
+        public String taste(){
+            return "good";
+        }
+    }
+
+    //修改后的工厂接口，既可以获得水果，也可以获得甜点
+    public interface FoodFactory{
+        Fruit getFruit();
+        Dessert getDessert();
+    }
+
+    //第一个工厂，可以获得苹果和黑森林蛋糕
+    public class FirstFoodFactory implements FoodFactory{
+
+        @Override
+        public Fruit getFruit(){
+            return new Apple();  //如果要获得香蕉，这里修改为new Banana() 或新建工厂具体实现类
+        }
+        
+        @Override
+        public Dessert getDessert(){
+            return new BlackForestCake();
+        }
+    }
+
+    //第二个工厂，可以获得香蕉，但是无法获得甜点
+    public class SecondFoodFactory implements FoodFactory{
+
+        @Override
+        public Fruit getFruit(){
+            return new Banana();
+        }
+        
+        @Override
+        public Dessert getDessert(){
+            return null;
+        }
+    }
+
+    public class Main{
+        public static main(String[] args){
+            FirstFoodFactory firstFoodFactory = new FirstFoodFactory();
+            SecondFoodFactory secondFoodFactory = new SecondFoodFactory();
+            Fruit fruit1 = firstFoodFactory().getFruit();
+            Dessert dessert1 = firstFoodFactory().getDessert();
+            Fruit fruit2 = secondFoodFactory().getFruit();
+            Dessert dessert2 = secondFoodFactory().getDessert();
+            
+            fruit1.getName();  //Apple
+            dessert1.taste();  //delicious
+            fruit2.getName();  //Banana
+            //dessert2.taste();  //dessert2为null，具体使用时，需要根据情况进行相应判断  
+        }
+    }
+
+注意：以上class均属于不同java文件，一个java文件中只能存在一个pulic外部类。
+
+* 可以发现，工厂方法模式可以看作抽象工厂模式只有单一产品的情况。
 
 
 
