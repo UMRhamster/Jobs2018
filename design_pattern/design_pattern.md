@@ -308,5 +308,227 @@ java的设计模式大体上分为三类：
 
 * 可以发现，工厂方法模式可以看作抽象工厂模式只有单一产品的情况。
 
+<h1>结构型模式</h1>
+
+<h1>行为型模式</h1>
+<h2>观察者模式</h2>
+观察者模式，又可以称之为发布-订阅模式，观察者，顾名思义，就是一个监听者，类似监听器的存在，一旦被观察/监听的目标发生的情况，就会被监听者发现，这么想来目标发生情况到观察者知道情况，其实是由目标将情况发送到观察者的。
+
+### 回调
+A类的a()方法调用B类的b()方法，B类的b()方法执行完之后主动调用A类的callback()方法，即回调方法。
+
+下面使用代码模拟一个场景：老师向学生提问，学生通过此方法告诉老师答案。
+
+    public interface Callback {
+        void answer(String answer);
+    }
+
+首先是一个回调接口，只有一个方法answer()，就是学生将答案告诉老师
+
+    public class Teacher implements Callback {
+        public void ask(Student student){  //老师指定学生来回答问题
+            System.out.println("老师问学生问题");
+            student.solve(this);  //学生开始解决问题
+        }
+        @Override
+        public void answer(String answer) {  //这是回调方法，由学生解决问题之后调用
+            System.out.println("老师已经得到学生的答案："+answer);
+        }
+    }
+定义一个老师类，实现回调接口，其中有两个方法，第一个方法就是Teacher对象调用Student对象的sovle()方法，即老师向学生提问，学生思考问题；第二个方法就是Callback接口中的方法，表示老师得到学生的答案之后要做的事。
+
+    public class Student {
+        public void solve(Callback callback){
+            try {
+                Thread.sleep(3000);  //延时3秒，模拟做题需要的时间
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println("学生解决问题");  //学生解决问题
+            callback.answer("mc^2");  //然后告诉老师答案
+        }
+    }
+定义一个学生类，Student类的solve()方法表示学生思考问题，学生思考完毕之后，调用Teacher的回调方法，将答案告诉老师。
+
+    public class Main{
+        public static void main(String[] args) {
+            Student student = new Student();  //创建学生对象
+            Teacher teacher = new Teacher();  //创建老师对象
+            teacher.ask(student);  //老师向学生提问
+        }
+    }
+下面是程序的运行结果：
+
+    老师问学生问题
+    学生解决问题
+    老师已经得到学生的答案：mc^2
+
+### 观察者模式
+定义对象间的一对多的依赖关系，当一个对象状态发生改变时，所有依赖他的对象都得到通知并被自动更新。
+
+即A对象(观察者)对B对象(被观察者)的某种变化高度敏感，需要在B变化的一瞬间做出反应。当然，这是被动观察，不需要观察者时刻盯着检查被观察者的状态，而是在B变化的时候主动通知A。
+
+    //被观察者接口
+    public interface Subject{
+        //注册观察者
+        void registerObserver(Observer observer);
+        //移除观察者
+        void removeObserver(Observer ovserver);
+        //通知观察者
+        void notifyObservers();
+    }
+
+    //观察者接口
+    public interface Observer{
+        //观察者的回调方法，由被观察者进行回调
+        void update();
+    }
+
+    //天气数据（被观察者）
+    public class WeatherData implements Subject{
+        private List<Observer> observers;
+
+        private float temperature; //温度
+        private float humidity; //湿度
+        private float pressure; //气压
+
+        public WeatherData(){
+            observers = new ArrayList<>();
+        }
+
+        @Override
+        public void registerObserver(Observer observer){
+            observers.add(observer);
+
+        }
+
+        @Override
+        public void removeObserver(Observer observer){
+            observers.remove(observer);
+        }
+
+        @Override
+        public void notifyObservers(){
+            for(Observer observer : observers){
+                observer.update();  //调用回调方法
+            }
+        }
+
+        //天气数据改变时，会调用此方法通知所有观察者数据更新
+        public void  weatherDataChanged(){
+            notifyObservers();
+        }
+
+        //更新天气数据
+        public void setWeatherData(float temperature, float humidity, float pressure){
+            this.temperature = temperature;
+            this.humidity = humidity;
+            this.pressure = pressure;
+            weatherDataChanged(); //调用weatherDataChanged()通知所有观察者
+        }
+
+        public float getTemperature(){
+            return temperature;
+        }
+
+        public float getHumidity(){
+            return humidity;
+        }
+
+        public float getPressure(){
+            return pressure;
+        }
+    }
+
+    //天气网站（观察者）
+    public WeatherWebsite implements Observer{
+        private WeatherData weatherData;
+
+        private float temperature;
+        private float humidity;
+        private float pressure;
+        public WeatherWebsite(WeatherData weatherData){
+            this.weatherData = weatherData;
+        }
+
+        //此处实现update()回调方法的具体实现细节
+        @Override
+        public void update() { 
+            temperature = weatherData.getTemperature();
+            humidity = weatherData.getHumidity();
+            pressure = weatherData.getPressure();
+            display();  //进行天气数据显示
+        }
+
+        //显示当前天气数据
+        public void display(){
+            System.out.println("天气网站当前温度为："+temperature);
+            System.out.println("天气网站当前湿度为："+humidity);
+            System.out.println("天气网站当前气压为："+pressure);
+        }
+    }
+
+    //天气应用（观察者）
+    public class WeatherApp implements Observer{
+        private WeatherData weatherData;
+
+        private float temperature;
+        private float humidity;
+        private float pressure;
+        public WeatherApp(WeatherData weatherData){
+            this.weatherData = weatherData;
+        }
+
+        //此处实现update()回调方法的具体实现细节
+        @Override
+        public void update() {
+            temperature = weatherData.getTemperature();
+            humidity = weatherData.getHumidity();
+            pressure = weatherData.getPressure();
+            display();  //进行天气数据显示
+        }
+
+        //显示当前天气数据
+        public void display(){
+            System.out.println("天气应用当前温度为："+temperature);
+            System.out.println("天气应用当前湿度为："+humidity);
+            System.out.println("天气应用当前气压为："+pressure);
+        }
+    }
+
+    public class Main{
+        public static void main(String[] args){
+            WeatherData weatherData = new WeatherData(); //创建天气数据对象
+            WeatherWebsite weatherWebsite = new WeatherWebsite(weatherData);  //创建天气网站对象
+            weatherData.registerObserver(weatherWebsite); //添加观察者
+            weatherData.setWeatherData(38,10,10); //更新天气数据
+            WeatherApp weatherApp = new WeatherApp(weatherData); //创建天气应用对象
+            weatherData.registerObserver(weatherApp); //添加观察者
+            weatherData.setWeatherData(11,11,11);
+            weatherData.removeObserver(weatherWebsite); //移除观察者
+            weatherData.setWeatherData(9,9,9);
+        }
+    }
+
+以上代码执行结果：
+
+    天气网站当前温度为：38.0
+    天气网站当前湿度为：10.0
+    天气网站当前气压为：10.0  //这是第一次更新天气数据，只有天气网站一个观察者
+
+    天气网站当前温度为：11.0
+    天气网站当前湿度为：11.0
+    天气网站当前气压为：11.0  //这是第二次更新天气数据，这是天气网站观察者
+
+    天气应用当前温度为：11.0
+    天气应用当前湿度为：11.0
+    天气应用当前气压为：11.0  //这是第二次更新天气数据，这是后来的观察者天气应用
+
+    天气应用当前温度为：9.0
+    天气应用当前湿度为：9.0
+    天气应用当前气压为：9.0  //这是第三次更新天气数据，此时天气网站不再依赖此天气数据
+
+
+
 
 
