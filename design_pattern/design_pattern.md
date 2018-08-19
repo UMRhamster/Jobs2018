@@ -309,6 +309,152 @@ java的设计模式大体上分为三类：
 * 可以发现，工厂方法模式可以看作抽象工厂模式只有单一产品的情况。
 
 <h1>结构型模式</h1>
+<h2>代理模式</h2>
+代理模式提供了对目标对象另外的访问方式；即通过代理对象访问目标对象.这样做的好处是：可以在目标对象实现的基础上，增强额外的功能操作，即扩展目标对象的功能。
+
+例如，我们想查看的某个方法的执行过程:
+
+    public void method(){
+        System.ou.println("方法执行前");
+        //中间方法体省略
+        //...
+        System.out.println("方法执行后");
+    }
+我们会通过以上代码对原本方法进行修改，但是这样是有问题的，违背了开闭原则，我们修改了原来的代码。
+
+### 静态代理
+静态代理在使用时,需要定义接口或者父类,被代理对象与代理对象一起实现相同的接口或者是继承相同父类。
+
+    //定义一个接口
+    public interface UserDao{
+        //保存数据方法
+        void save();
+    }
+
+    //定义一个具体类实现UserDao接口
+    public class UserDaoImp implements UserDao{
+        @Override
+        public void save(){
+            System.out.println("保存数据");  
+        }
+    }
+
+    //定义代理类
+    public class UserDaoImpProxy implements UserDao{
+        private UserDao target; //目标对象
+        public UserDaoImpProxy(UserDao target){
+            this.target = target;
+        }
+
+        @Override
+        public void save(){
+            System.out.println("保存数据之前");
+            target.save();//执行目标对象的方法
+            System.out.println("保存数据之后");
+        }
+    }
+
+    //
+    public class Main{
+        public static void main(String[] args){
+            //目标对象
+            UserDaoImp target = new UserDapImp();
+            //代理对象，通过构造方法建立代理关系
+            UserDaoImpProxy proxy = new UserDapImpProxy(target);
+            //执行代理方法
+            proxy.save();
+        }
+    }
+
+* 静态代理可以做到在不修改目标对象功能的前提下，对目标功能进行增强；
+* 如果接口增加了方法，则代理类也需要进行修改；因为每一个接口对象对应一个委托对象，如果委托对象非常多，代理类就会变得非常臃肿。
+
+### 动态代理
+
+使用动态代理，可以根据传进来的业务实现类，动态的创建代理类，同时避免静态代理类的问题
+
+#### jdk代理
+jdk动态代理只能对实现了接口的类生成代理，而不能针对类。
+
+    public class ProxyFactory{
+        private Object target;//目标对象
+        public ProxyFactory(Object target){
+            this.target = target;
+        }
+
+        public Object getProxyInstance(){
+            return Proxy.newProxyInstance(
+                target.getClass().getClassLoader(),
+                target.getClass().getInterfaces(),
+                new InvocationHandler(){
+                    @Override
+                    public Object invoke(Object proxy, Mehtod method, Object[] args) throws Throwable{
+                        System.out.println("方法执行前");
+                        //执行目标对象的方法
+                        Object returnValue = method.invoke(target,args);
+                        System.out.println("方法执行后");
+                        return returnValue;
+                    }
+                }
+            );
+        }
+    }
+
+    public class Main{
+        public static void main(String[] args){
+            UserDao target = new UserDaoImp();  //目标对象
+            UserDao proxy = (UserDao) new ProxyFactory(target).getProxyInstance();  //通过ProxyFactory动态创建代理对象
+            proxy.save();  //执行代理方法
+        }
+    }
+
+#### cglib代理
+上面的静态代理和动态代理模式都是要求目标对象是实现一个接口的目标对象,但是有时候目标对象只是一个单独的对象,并没有实现任何的接口,这个时候就可以使用以目标对象子类的方式类实现代理,这种方法就叫做:Cglib代理。
+
+使用cglib代理需要带入jar包，可在github上下载，以下实例基于 [cglib-nodep-3.2.7.jar](https://github.com/cglib/cglib/releases)。
+注意下载 cglib-nodep 里面包含了需要用到的 asm 包，cglib 则不包含asm包，否则可能会出现版本不匹配问题。
+
+    //首先定义一个类，它并没有实现接口
+    public class UserDao{
+        public void save(){
+            System.out.println("保存数据");
+        }
+    }
+
+    //
+    public class ProxyFactory implements MethodInterceptor{
+        private Object target;  //目标对象
+
+        public ProxyFactory(Object target){
+            this.target = target;
+        }
+
+        public Object getProxyInstance(){
+            Enhancer enhancer = new Enhancer();  //加强器，用于创建代理对象
+            enhancer.setSuperclass(target.getClass());  //指定父类
+            enhancer.setCallback(this);  //设置回调，即下面的intercept()，代理类的方法调用都会调用回调方法
+            return enhancer.create();  //创建代理对象
+        }
+        @Override
+        public Object intercept(Object o, Method method, Object[] objects, MethodProxy methodProxy) throws Throwable {
+            System.out.println("方法执行前");
+            Object returnValue = method.invoke(target,objects);
+            System.out.println("方法执行后");
+            return returnValue;
+        }
+    }
+
+    public class Main{
+        public static void main(String[] args){
+            UserDao target = new UserDao();  //目标对象
+            UserDao proxy = (UserDao) new ProxyFactory(target).getProxyInstance();  //通过ProxyFactory动态创建代理对象
+            proxy.save();  //执行代理方法
+        }
+    }
+
+总结：
+* jdk动态代理只能对实现了接口的类生成代理，而不能针对类。
+* cglib是针对类实现代理，主要是对指定的类生成一个子类，覆盖其中的方法（继承）
 
 <h1>行为型模式</h1>
 <h2>观察者模式</h2>
