@@ -29,3 +29,35 @@ Android系统的底层是建立在Linux系统之上，该平台由操作系统�
 
 <h2 id="1.3">Android应用的清单文件：AndroidManifest.xml</h2>
 AndroidManifest.xml 清单文件是每个Android项目所必须的，它是整个Android应用的全局描述文件。AndroidManifest.xml清单文件说明了该应用的名称、所使用的图标以及包含的细节等。
+
+AndroidMainifest.xml清单文件通常可以包含一下信息：
+
+* 应用程序的包名；
+* 应用程序包含的组件，如Acticity、Service、BroadcastReceiver和ContentProvider等；
+* 应用程序兼容的最低版本；
+* 应用程序使用系统所需的权限声明；
+* 其他程序访问该程序所需要的权限声明。
+
+### 应用程序权限说明
+1. 声明运行该应用本身所需要的权限
+
+   在<manifest.../>元素中添加<uses-permission.../>即可为程序本身声明权限。
+
+       //声明该应用本身需要的网络权限
+       <uses-permission android:name="android.permission.INTERNET">
+2. 声明调用该应用所需要的权限
+
+<h2>Android应用的基本组件介绍</h2>
+
+### Activity
+Activity是Android应用中负责与用户交互的组件——大致上可以把它想象成Swing编程中的JFrame控件
+
+Activity为Android应用提供了可视化用户界面，如果该Android应用需要多个用户界面，那么这个Android应用将会包含多个Activity，多个Activity组成Activity栈，当前活动的Activity位于栈顶。
+### Service
+Service与Activity的地位是并列的，它也代表一个单独的Android组件。Service与Activity的区别在于：Service通常位于后台运行，它一般不需要与用户交互，因此Service组件没有图形用户界面。
+### BroadcastReceiver
+BroadcastReceiver是Android应用中另一个重要组件，它代表广播消息接收器。BroadcastReceiver类似于事件编程中的监听器。但是普通时间监听器监听的事件源是程序中的对象；而BroadcastReceiver监听的事件源是Android应用中的其他组件。
+### ContentProvider
+对于Android应用而言，它们必须是相互独立，各自运行在各自的进程中。Android系统为跨应用数据交换提供了一个标准：ContentProvider。通常与ContentProvider结合使用的是ContentResolver,一个应用程序使用ContentProvider暴露自己的数据，而另一个应用程序则通过ContentProvider来访问数据。
+### Intent
+Intent并不是Android应用的组件，但它对于Android应用的作用非常强大——它是Android应用内不同组件之间通信的载体。Activity、Service、BroadcastReceiver三种组件之间的通信都是以Intent作为载体。
