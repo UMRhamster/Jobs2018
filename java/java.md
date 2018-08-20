@@ -19,8 +19,11 @@
   - [final](#5.1)
   - [static](#5.2)
   - [类初始化顺序](#5.3)
-* [六、特性](#6)
-  - [Java与C++的区别](6.1)
+* [六、Java对象排序](#6)
+  - [Comparable接口](#6.1)
+  - [Comparator接口](#6.2)
+* [七、特性](#7)
+  - [Java与C++的区别](7.1)
 <h1 id="1">一、数据类型</h1>
 <h2 id="1.1">基本数据类型及其包装类型</h2>
 <table>
@@ -600,8 +603,147 @@ super可以理解为是指向自己超（父）类对象的一个指针，而这
 
    如果有继承关系，先初始化父类的静态属性和静态方法块，再初始化子类的静态属性和静态方法块，然后初始化父类的普通属性和普通方法块，以及构造函数,最后初始化子类的普通属性和普通方法块，以及构造函数。
 
-<h1 id="6">六、特性</h1>
-<h2>Java与C++的区别</h2>
+<h1 id="6">六、Java对象排序</h1>
+很多情况下，我们需要对一组数据进行排序，可以通过编写排序算法来进行排序，例如冒泡排序、快速排序、堆排序等等，但是这样太费时间了。我们完全可以利用jdk提供的排序算法，直接通过Arrays和Collections工具类调用sort方法进行排序。那么具体如何按照我们的要求进行排序呢？
+<h2 id="6.1">Comparable接口</h2>
+jdk中，已经有一部分类实现了Comparable接口，像Integer、Double、String等等。
+
+Comparable接口提供一个 public int compareTo(T o); 方法，它返回一个int类型的值，对于表达式x.compareTo(y)，如果返回0，表示x等于y,如果x大于0,表示x大于y，如果x小于0，表示x小于y。
+
+    public class Student implements Comparable<Student>{
+        private String name;
+        private int age;
+
+        public Student(){}
+
+        public Student(String name, int age){
+            this.name = name;
+            this.age = age;
+        }
+
+        @Override
+        public int compareTo(Student o) {
+            return name.compareTo(o.name) == 0?age-o.age:name.compareTo(o.name);
+        }
+
+        @Override
+        public String toString() {
+            return "name:"+name+" age:"+age;
+        }
+    }
+上面代码中，我们定义了一个Student类，实现了Comparable接口，并重写了compareTo方法，重写了toString方法用于输出显示。
+
+在compareTo方法中，我们使用了三目运算符，优先按照姓名排序，当姓名一致时，再按照年龄排序。String类已经实现了Comparable接口，其compareTo方法如下：
+    
+    public int compareTo(String anotherString) {
+        int len1 = value.length;
+        int len2 = anotherString.value.length;
+        int lim = Math.min(len1, len2);
+        char v1[] = value;
+        char v2[] = anotherString.value;
+
+        int k = 0;
+        while (k < lim) {
+            char c1 = v1[k];
+            char c2 = v2[k];
+            if (c1 != c2) {
+                return c1 - c2;
+            }
+            k++;
+        }
+        return len1 - len2;
+    }
+可以看出，String排序，按照ascii码进行排序，并且字符短的优先。
+
+    public class Main{
+        public static void main(String[] args) {
+            List<Student> list = new ArrayList<>();  //新建Arraylist集合，保存学生对象
+            list.add(new Student("Ben",12));  //加入学生进集合
+            list.add(new Student("Peter",18));  //加入学生进集合
+            list.add(new Student("Alice",16));  //加入学生进集合
+            list.add(new Student("Peter",14));  //加入学生进集合
+            System.out.println(list);  //排序前输出
+            Collections.sort(list);  //调用Clooections工具类的sort进行排序
+            System.out.println(list);  //排序后输出
+        }
+    }
+结果如下，按照我们想要的进行了排序：
+
+    [name:Ben age:12, name:Peter age:18, name:Alice age:16, name:Peter age:14]
+    [name:Alice age:16, name:Ben age:12, name:Peter age:14, name:Peter age:18]
+
+
+<h2 id="6.2">Comparator接口</h2>
+Comparator接口中提供了 int compare(T o1, T o2); 方法。该方法接受两个同类型参数，方法返回值也是int型，比较规则和Comparable接口一致。
+
+    public class Student {
+        private String name;
+        private int age;
+
+        public Student(){}
+
+        public Student(String name, int age){
+            this.name = name;
+            this.age = age;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
+
+        @Override
+        public String toString() {
+            return "name:"+name+" age:"+age;
+        }
+    }
+定义Student类如上。
+
+    public class StudentComparator implements Comparator<Student> {
+        @Override
+        public int compare(Student o1, Student o2) {
+            return o1.getAge()-o2.getAge();
+        }
+    }
+定义排序类StudentComparator如上，使其实现Comparator接口，并重写compare方法，这次我们只根据年龄进行排序，如果想要进行复杂排序，可自行尝试。
+
+    public class Main{
+        public static void main(String[] args) {
+            List<Student> list = new ArrayList<>();
+            list.add(new Student("Ben",12));
+            list.add(new Student("Peter",18));
+            list.add(new Student("Alice",16));
+            list.add(new Student("Peter",14));
+            System.out.println(list);
+            Collections.sort(list,new StudentComparator());  //注意这里sort方法调用传入了两个参数，一个是要比较的集合对象，一个是比较器对象
+            System.out.println(list);
+        }
+    }
+还是使用原来的数据进行排序，排序结果如下：
+
+    [name:Ben age:12, name:Peter age:18, name:Alice age:16, name:Peter age:14]
+    [name:Ben age:12, name:Peter age:14, name:Alice age:16, name:Peter age:18]
+
+### Comparable接口与Comparator接口比较
+
+* Comparable相当于"内部比较器"，实现该接口的类，意味着该类支持排序
+* Comparator相当于"外部比较器"，通过新建一个比较器实现此接口，来进行排序。
+* Comparable接口实现简单，但是需要修改源码；而Comparator的好处是不需要修改源码，但是需要另外实现一个比较器类。
+
+
+<h1 id="7">七、特性</h1>
+<h2 id="7.1">Java与C++的区别</h2>
 
 * Java为解释性语言，程序源代码经过Java编译器编译成字节码，然后由JVM解释执行。而C++为编译型语言，源代码经过编译和链接后生成可执行的二进制代码，可直接执行。因此Java的执行速度比C/C++慢，但Java能够跨平台执行，C/C++不能。
 * Java是纯面向对象语言，除了基本数据类型，其他类型都是类。C++既可以面向过程也可以面向对象。
