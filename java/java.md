@@ -753,3 +753,62 @@ Comparator接口中提供了 int compare(T o1, T o2); 方法。该方法接受�
 * Java不支持运算符重载，而C++支持运算符重载。
 * Java中goto是保留字，但是不可用，而C++中可以使用goto。
 
+<h2>Lambda表达式</h2>
+
+### 函数式接口
+函数式接口(Functional Interface)是Java 8对一类特殊类型的接口的称呼。这类接口只定义了唯一的抽象方法的接口（除了隐含的Object对象的公共方法），用作Lambda表达式的类型。
+
+    @FunctionalInterface  //可以使用FunctionalInterface注解,保证函数式接口的正确性，当接口中出现超过一个抽象方法就会报错
+    public interface AddListener {
+        int add(int x, int y);
+    }
+对于OnClickListenre接口，它只有一个抽象方法onClick,接收两个int型参数,返回值为int类型，这个接口可以看成是一个函数式接口。可以通过以下方式声明其对象，
+
+    AddListener addListener = (a,b)->a+b;
+    addListener.add(2,4); //结果为6
+
+### Lambda表达式示例
+
+Comparator比较器，以前面的[Java对象排序](#6.2)为例,
+    
+    //通过匿名内部类的方式实现比较器进行比较
+    Collections.sort(list,new Comparator<Student>(){
+        @Override
+        public int compare(Student o1, Student o2){
+            return o1.getAge()-o2.getAge();
+        }
+    });
+    //使用Lambda表达式
+    Collections.sort(list,(o1,o2)->o1.getAge()-o2.getAge());
+    //或者
+    Collections.sort(list, Comparator.comparingInt(o->o.getAge()));
+    //或者
+    Collections.sort(list,Comparator.comparingInt(Student::getAge));
+开启子线程
+
+    new Thread(new Runnable(){
+        @Override
+        public void run(){
+            System.out.print("匿名内部类方式");
+        }
+
+    }).start();
+    //使用Lambda表达式
+    new Thread(()->System.out.print("Lambda表达式方式")).start();
+    //如果run内部是代码块
+    new Thread(()->{
+        System.out.print("Lambdad方式");
+        System.out.print("开启线程");
+    }).start();
+
+Lambda表达式的基本写法如下：
+
+    (params) -> expression
+
+    (params) -> statement
+
+    (params) -> { statements }
+
+* lambda表达式可以理解对于函数式接口和其中的抽象方法的具体实现，这样当有一个需要函数式接口参数的方法时，我们就可以给其传递一个对应的lambda表达式作为参数
+* Java中全部都是类，函数必须依赖于类存在，而使用Lambda表达式，看上去就像是将一个函数作为方法的参数传递了过去。    
+
