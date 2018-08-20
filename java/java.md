@@ -23,7 +23,8 @@
   - [Comparable接口](#6.1)
   - [Comparator接口](#6.2)
 * [七、特性](#7)
-  - [Java与C++的区别](7.1)
+  - [Java与C++的区别](#7.1)
+  - [Lambda表达式](#7.2)
 <h1 id="1">一、数据类型</h1>
 <h2 id="1.1">基本数据类型及其包装类型</h2>
 <table>
@@ -753,7 +754,7 @@ Comparator接口中提供了 int compare(T o1, T o2); 方法。该方法接受�
 * Java不支持运算符重载，而C++支持运算符重载。
 * Java中goto是保留字，但是不可用，而C++中可以使用goto。
 
-<h2>Lambda表达式</h2>
+<h2 id="7.2">Lambda表达式</h2>
 
 ### 函数式接口
 函数式接口(Functional Interface)是Java 8对一类特殊类型的接口的称呼。这类接口只定义了唯一的抽象方法的接口（除了隐含的Object对象的公共方法），用作Lambda表达式的类型。
