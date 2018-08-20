@@ -61,3 +61,86 @@ BroadcastReceiver是Android应用中另一个重要组件，它代表广播消�
 对于Android应用而言，它们必须是相互独立，各自运行在各自的进程中。Android系统为跨应用数据交换提供了一个标准：ContentProvider。通常与ContentProvider结合使用的是ContentResolver,一个应用程序使用ContentProvider暴露自己的数据，而另一个应用程序则通过ContentProvider来访问数据。
 ### Intent
 Intent并不是Android应用的组件，但它对于Android应用的作用非常强大——它是Android应用内不同组件之间通信的载体。Activity、Service、BroadcastReceiver三种组件之间的通信都是以Intent作为载体。
+<h2>Android的事件处理</h2>
+当用户在程序界面上执行各种操作时，应用程序必须为用户动作提供响应动作，这种响应动作就需要通过事件处理来完成。
+
+Android提供了两种方式的事件处理：基于回调的事件处理和基于监听的事件处理。
+
+### 基于监听的事件处理
+在时间监听的处理模型中，主要涉及如下三类对象：
+
+Event Source(事件源)：事件发生的场所，通常就是各个组件，例如按钮、窗口、菜单等。<br/>
+Event(时间)：事件封装了界面组件上发生的特定事情（通常是一次用户操作）。<br/>
+Event Listener(时间监听器)：负责监听事件源所发生的事件，并对各种时间做出相应的响应。
+
+Android的事件处理机制是一种委派式（Delegation）事件处理方式：普通组件（事件源）将整个事件处理委托给特定的对象（事件监听器）；当该时间源发生指定的事件时，就通知所委托的事件监听器，由事件监听器来处理这个事件。
+
+Android中基于监听的时间处理模型的编程步骤如下：
+1. 获取普通界面组建（事件源），也就是被监听的对象。
+2. 实现事件监听器类，该监听器类是一个特殊的Java类，必须实现一个XxxListener接口。
+3. 调用事件源的setXxxListener方法将时间监听器对象注册给普通组件（事件源）。
+   
+当事件源上发生指定事件时，Android会触发事件监听器，由事件监听器调用相应的方法（事件处理器）来处理事件。
+
+    Button button = findViewById(R.id.btn);
+    button.setOnClickListener(new View.onClickListener(){ //此处通过匿名内部类方式实现事件监听器类
+        @Override
+        public void onClick(View view) {
+            //事件处理
+            //Log.d("MainActivity","点击了按钮");
+        }
+    });
+
+所谓事件监听器，其实就是实现了特定接口的Java类的实例。在程序中实现事件监听器，通常有如下几种形式：
+* 内部类形式：将事件监听器类定义成当前类的内部类。
+* 外部类形式：将事件监听器类定义成一个外部类。
+* Activity本身作为事件监听器类：让Activity本身实现监听器接口，并实现事件处理方法。
+* 匿名内部类形式：使用匿名内部类创建事件监听器对象。
+
+当然，还有一种直接在界面布局文件中为指定标签绑定事件处理方法。在xml文件中为控件指定onClick属性，其实就是一个方法名。
+ 
+    <Button
+        android:id="@+id/btn"
+        android:layout_width="wrap_content"
+        android:layout_weight="wrap_content"
+        android:onClick="click"/>
+
+然后在对应Activity中定义一个click(View view)方法。
+
+    public class MainActivity extends AppCompatActivity {
+        @Override
+        protected void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            setContentView(R.layout.activity_main);
+        }
+
+        //对应布局文件中onclick属性，注意public修饰，返回值为void，形参为View对象
+        public void click(View view){
+            Log.d("MainActivity","点击了按钮");
+        }
+    }
+
+### 基于回调的事件处理
+基于回调的事件处理模型中，事件源与时间监听器是统一的，或者说事件监听器完全消失了。当用户在GUI组件上激发某个事件时，组件自己特定的方法会负责处理该事件。
+
+为了实现回调机制的事件处理，Android为所有GUI组件都提供了一些事件处理的回调方法。
+
+回调机制可通过自定义View来实现，自定义View时重写该View的事件处理方法即可。
+
+    public class MyButton extends Button{
+        public MyButton(Context context, AttributeSet set){
+            super(context,set);
+        }
+        @Override
+        public boolean onKeyDown(int ketCode, KeyEvent event){
+            super.onKeyDown(keyCode,event);
+            Log.d("test","onKeyDown in MyButton");
+            return true;
+        }
+    }
+在xml文件中使用MyButton组件，在Activity中就不需要绑定事件监听器，因为该按钮自己重写了onKeyDown(int keyCode, KeyEvent event)方法，意味着该按钮将会自己处理相应的事件。
+
+#### 基于回调的事件传播
+几乎所有基于回调的时间处理方法都有一个boolean类型的返回值，该返回值用于标识该处理方法是否能完全处理该事件。
+* 如果处理事件的回调方法返回true，表明该处理方法已完全处理该事件，该事件不会传播出去。
+* 如果处理事件的回调方法返回false，表明该处理方法并未完全处理该事件，该事件会传播出去。
