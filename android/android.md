@@ -176,3 +176,32 @@ final boolean sendMessageDelayed(Message msg, long delayMilis)：指定多少毫
 
 在UI线程中，系统已经初始化了一个Looper对象，因此直接创建Handler即可。在新建子线程中，必须自己创建一个Looper对象，并启动它。通过调用Looper的静态方法prepare() 创建Looper对象，在调用它的静态方法loop()方法来启动它。loop()方法使用一个死循环不断取出Messagequeue中的消息，并将取出的消息分给该消息对应的Handker进行处理。
 
+<h2>异步任务</h2>
+Android的UI线程主要负责处理用户的按键事件、用户触屏事件及屏幕绘图事件等，因此我们不应该在UI线程中进行耗时的操作，否则可能会导致ANR（Application Not Responding）异常。应当将耗时操作放在子线程中去完成，但是子线程也可能需要动态更新UI，而Android又不允许子线程直接更新UI。
+
+为了解决新线程不能更新UI组件的问题，Android提供了如下几种解决方案。
+* 使用Handler实现线程之间的通信。
+* Activity.runOnUiThread(Runnable)
+* View.post(Runnable)
+* View.postDelayed(Runnable,long)
+  
+ 使用异步任务（Async Task）可以简化子线程更新UI操作。Async更轻量级一些，适用于简单的异步处理，不需要借助线程和Handler即可实现。
+
+ AsyncTask<Params,Progress,Result>是一个抽象类，通常用于被继承，继承AsyncTask时需要指定如下三个泛型参数。
+* Params：启动任务执行的输入参数的类型
+* Progress：后台任务完成后返回结果的类型。
+* Result：后台执行任务完成后返回结果类型
+
+使用AsyncTask如下
+
+1. 创建AsyncTask的子类，并为三个泛型参数指定类型，如果某个泛型参数不需要指定类型，则可以将它指定为Void。
+
+2. 根据需要，实现一下方法
+   * doInBackground(Params...)：重写该方法就是后台线程将要完成的任务。该方法可以调用publishProgress(Progress...values)方法更新人物的执行进度。
+   * onProgressUpdate(Progress...values)：publishProgress方法会触发该方法。
+   * onPreExecute()：该方法将在执行后台耗时操作前被调用。通常用于完成一些初始化准备工作。
+   * onPostExecute(Result result)：当doInBackground()完成后，会自动调用此方法，并将返回值传给此方法。
+3. 调用AsyncTask子类的实例的execute(Params...params)开始执行耗时任务。
+
+必须在UI线程中创建AsyncTask实例和调用execute()方法，并且只能被执行一次，多次调用会引发异常。
+
