@@ -144,3 +144,35 @@ Android中基于监听的时间处理模型的编程步骤如下：
 几乎所有基于回调的时间处理方法都有一个boolean类型的返回值，该返回值用于标识该处理方法是否能完全处理该事件。
 * 如果处理事件的回调方法返回true，表明该处理方法已完全处理该事件，该事件不会传播出去。
 * 如果处理事件的回调方法返回false，表明该处理方法并未完全处理该事件，该事件会传播出去。
+
+<h2>Handler消息传递机制</h2>
+处于性能的考虑，Android的UI操作并不是线程安全的，这意味者如果有多个线程并发操作UI组件，则可能导致线程安全问题。因此，只允许UI线程修改Activity里的UI组件。
+
+当程序第一次启动时，Android会同时启动一条主线程，主线程主要负责与UI相关的事件。主线程通常又被称为UI线程。
+
+Adnroid的消息传递机制主要主要就是为了解决Android应用的多线程问题——Android平台只允许UI线程修改Activity里的UI组件，这样就会导致新启动的线程无法动态改变界面组件的属性值。通过Handler的消息传递机制，我们可以在子线程中修改界面组件的属性值。
+
+### Handler类
+Handler类的主要作用有两个
+* 在新启动的线程中发送消息。
+* 在主线程中获取、处理消息。
+
+Handler类包含如下方法用于发送、处理消息：
+
+void handleMessage(Message msg)：处理消息的方法。该方法通常用于被重写。<br/>
+final boolean hasMessage(int what)：检查消息队列中是否包含what属性为指定值的消息。<br/>
+final boolean hasMessage(int what, Object object)：检查消息队列中是否包含what属性为指定值且object属性为指定对象的消息。<br/>
+多个重载的Message(int what)：获取消息。<br/>
+sendEmptyMessage(int what)：发送空消息。<br/>
+final boolean sendEmptyMessageDelayed(int what, long delayMilis)：指定多少毫秒之后发送空消息。<br/>
+final boolean sendMessage(Message msg)：立即发送消息。<br/>
+final boolean sendMessageDelayed(Message msg, long delayMilis)：指定多少毫秒之后发送消息。
+
+### Handler、Looper、MessageQueue的工作原理
+* Message：Handler接收和处理的消息对象。
+* Looper：每个线程只能拥有一个Looper。它的loop方法负责读取MessageQueue中的消息，读到信息之后就把消息交给发送该消息的Handler进行处理。
+* MessageQueue：消息队列，采用先进先出的方式管理Message。程序创建Looper对象时，会在它的构造器中创建MessageQueue对象。
+* Handler：它能把消息发送给Looper管理的MessageQueue，并负责处理Looper分给它的消息。
+
+在UI线程中，系统已经初始化了一个Looper对象，因此直接创建Handler即可。在新建子线程中，必须自己创建一个Looper对象，并启动它。通过调用Looper的静态方法prepare() 创建Looper对象，在调用它的静态方法loop()方法来启动它。loop()方法使用一个死循环不断取出Messagequeue中的消息，并将取出的消息分给该消息对应的Handker进行处理。
+
