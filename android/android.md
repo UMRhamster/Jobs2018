@@ -205,3 +205,35 @@ Android的UI线程主要负责处理用户的按键事件、用户触屏事件�
 
 必须在UI线程中创建AsyncTask实例和调用execute()方法，并且只能被执行一次，多次调用会引发异常。
 
+<h1>Activity</h1>
+<h2>Activity生命周期</h2>
+
+![图片](https://github.com/UMRhamster/Jobs2018/raw/master/android/img/activity_lifecycle.png)
+
+onCreate()：创建Activity时被回调。该方法只会被调用一次。<br/>
+onStart()：启动Activity时被回调。<br/>
+onRestart()：重新启动activity时被回调。<br/>
+onResume()：恢复Activity时被回调。在onStart()方法后一定会回调onResume()方法。<br/>
+onPause()：暂停Activity时被回调。<br/>
+onStop()：停止Activity时被回调。<br/>
+onDestroy()：销毁Activity时被回调。该方法只会被调用一次。<br/>
+
+<h2>Activity的4中加载模式</h2>
+
+1. standard：标准模式，默认的加载模式。
+2. singleTop： Task栈顶单例模式。
+3. singleTask：Task栈内单例模式。
+4. singleInstance：全局单例模式。
+
+Android使用Task来管理多个Activity当我们启动一个应用时，Android就会为只创建一个Task，然后启动入口Activity。Task以栈的形式来管理Activity：先启动的ctivity被放在Task栈底，后启动的Activity被放在Task栈顶。
+
+Activity的加载模式，就负责管理实例化、加载Activity的方式，并可以控制Activity与Task之间的加载关系。
+### standard模式
+在这种模式下，每次启动Activity都会创建一个新的实例，并将该Activity添加到当前Task栈中——这种模式不会启动新的Task，新Activity将被添加到原有的Task中。
+### singleTop模式
+当要启动的Activity已经处于Task栈顶时，直接复用已有的Activity，否则创建新的实例。
+### singleTask模式
+在这种模式下，Activity在同一个Task内只有一个实例。如果要启动的Activity不存在，则创建Activity实例，加入Task栈；如果要启动的Activity已经位于Task栈顶，直接复用已有的Activity；如果要启动的Activity已经存在但不处于栈顶，则将该Activity之上的所有Activity出栈，从而使该Activity位于栈顶。
+### singleInstance模式
+在这种模式下，无论从哪个Task中启动目标Activity，都只会创建一个Activity实例，并使用一个全新的Task栈来加载该Activity实例。
+
