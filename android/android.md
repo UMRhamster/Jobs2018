@@ -237,3 +237,47 @@ Activity的加载模式，就负责管理实例化、加载Activity的方式，�
 ### singleInstance模式
 在这种模式下，无论从哪个Task中启动目标Activity，都只会创建一个Activity实例，并使用一个全新的Task栈来加载该Activity实例。
 
+<h1>Fragment</h1>
+Fragment必须依附于Activity使用，Fragment拥有自己的生命周期，也可以接受它自己的输入时间。
+<h2>Fragment生命周期</h2>
+虽然Fragment拥有自己的生命周期，但Fragment的生命周期会受它所在的Activity的生命周期控制。
+
+![图片](https://github.com/UMRhamster/Jobs2018/raw/master/android/img/fragment_lifecycle.png)
+
+<h1>Android数据存储</h1>
+
+1. 使用SharedPreferences存储数据
+
+   适用范围：保存少量数据，并且这些数据的格式很简单，都是普通字符串、基本类型的值等。
+
+   基于xml文件存储的key-value键值对数据，保存的数据一般是简单的配置信息。
+   #### 读取数据
+
+       //通过context获取SharedPreferences对象
+       SharedPreferences sharedPreferences = context.getSharedPreferences(name,Context.MODE_PRIVATE);
+       String value = sharedPreferences.getString(key,"无");
+   #### 写入数据
+       SharedPreferences.Editor editor = sharepreferences.edit();
+       editor.putString(key,value);
+       editor.commit();  //注意使用commit()提交所有写入数据
+
+2. 文件存储数据
+
+   Context提供了两个打开应用程序的数据文件夹里的文件IO流：FileInputStream openFileInput(String name);FileOutputStream openFileOutput(String name, int mode)。这两种方式是读写的手机的内部存储，空间是有限的。
+
+   #### 读写SD卡上的文件
+   调用Enviroment.getExternalStorageState()判断手机是否插入SD卡。<br/>
+   调用Enviroment.getExternalStorageDirectory()方法来获取SD卡的目录。<br/>
+   使用FileInputStream、FileOutputStream、FileReader、FileWriter读写SD卡里的文件。
+       
+       //在SD卡中创建与删除文件权限
+       <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+       //向SD卡写入数据权限
+       <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+3. SQLite存储数据
+
+   Android系统集成了轻量级的数据库：SQLite。
+4. 使用ContentProvider存储数据
+5. 网络存储数据
+
+
