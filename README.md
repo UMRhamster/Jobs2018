@@ -27,5 +27,5 @@
 # 8.设计模式
 >[设计模式](https://github.com/UMRhamster/Jobs2018/blob/master/design_pattern/design_pattern.md)
 
-# 9.野生知识点
+# 9.知识点
 > [Java相关](https://github.com/UMRhamster/Jobs2018/blob/master/wild_knowledge_point/about_java.md)
