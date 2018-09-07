@@ -176,6 +176,49 @@ final boolean sendMessageDelayed(Message msg, long delayMilis)：指定多少毫
 
 在UI线程中，系统已经初始化了一个Looper对象，因此直接创建Handler即可。在新建子线程中，必须自己创建一个Looper对象，并启动它。通过调用Looper的静态方法prepare() 创建Looper对象，在调用它的静态方法loop()方法来启动它。loop()方法使用一个死循环不断取出Messagequeue中的消息，并将取出的消息分给该消息对应的Handker进行处理。
 
+### 由 Handler 引发的内存泄露问题以及解决方法
+内存泄漏：指一块分配的内存既不能使用，也不能被回收。
+
+在Android开发中,通常会使用如下handler代码
+
+    public class ShowActivity extends Activity{
+        private final Handler handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg){
+                //...
+            }
+        }
+    }
+
+这段代码可能会造成内存泄漏问题。
+
+上面代码中Handler对象是以匿名内部类的形式创建的，在java中非静态内部类和匿名内部类都会潜在的持有外部类的引用。当Activity结束(finish)时，如果MessageQueue中还有未处理的消息，那么消息会引用Handler，而非静态的Hanlder又会引用外部类，即Activity，因此导致Activity无法被回收，造成内存泄漏。
+
+通过使用静态内部类可以避免持有外部类引用。如果想要在Handler中调用所在外部类Activity，可以在Handler内部使用弱引用的方式指向所在的Activity。
+
+    public class ShowActivity extends Activity{
+
+        private static class MyHandler extends Handler{
+            private final WeakReference<ShowActivity> activity;
+
+            public MyHandler(ShowActivity activity){
+                this.activity = new WeakReference<ShowActivity>(activity);
+            }
+
+            @Override
+            public void handleMessage(Message msg){
+                ShowActivity showActivity = activity.get();
+                if(activity != null){
+                    //...
+                }
+            }
+        }
+
+        private final MyHandler handler = new Handler(this);
+    }
+
+通过以上代码可以避免由Handler引起的内存泄漏问题。
+
 <h2>异步任务</h2>
 Android的UI线程主要负责处理用户的按键事件、用户触屏事件及屏幕绘图事件等，因此我们不应该在UI线程中进行耗时的操作，否则可能会导致ANR（Application Not Responding）异常。应当将耗时操作放在子线程中去完成，但是子线程也可能需要动态更新UI，而Android又不允许子线程直接更新UI。
 
