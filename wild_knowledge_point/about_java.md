@@ -253,6 +253,29 @@ Java堆是被所有线程共享的一块内存区域，Java堆的唯一目的就
 ### 双亲委派模型的优点
 Java类伴随其类加载器具备了带有优先级的层次关系，确保了在各种加载环境的加载顺序。  
 
+<h2>内部类与静态内部类</h2>
+内部类是在一个类内部定义的类，相对的，包含内部类的类称为外部类。使用static关键字修饰的内部类，称为静态内部类，也只有这种情况下才能用static修饰类。
 
+    public class Outer{
+        //...
 
+        //普通内部类
+        public class InnerNormal{
 
+        }
+        //静态内部类
+        public static class InnerStatic{
+
+        }
+    }
+
+    public static void main(String[] args){
+        //创建外部类实例
+        Outer outer = new Outer();
+        //必须通过外部类实例才能创建普通内部类实例
+        InnerNormal innerNormal = outer.new InnerNormal();
+        //通过
+        Outer.InnerStatic innerStatic = new Outer.InnerStatic();
+    }
+
+普通内部类会持有外部类的引用
