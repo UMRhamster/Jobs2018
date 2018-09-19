@@ -32,3 +32,6 @@
 
 # 9.知识点
 > [Java相关](https://github.com/UMRhamster/Jobs2018/blob/master/wild_knowledge_point/about_java.md)
+
+# 10.面试相关
+> [面试相关](https://github.com/UMRhamster/Jobs2018/blob/master/interview/interview.md)
