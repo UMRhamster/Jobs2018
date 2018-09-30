@@ -314,7 +314,7 @@ Java语言中的泛型规则则不一样，它只在程序源码中存在，在�
         public void method(List<String> list){}
     }
 
-由于Java中的泛型是伪泛型，参数List<Integer>和List<String>编译之后都被擦除了，变成了一样的原生类型List<E>，擦除动作导致这两种方法的特征签名变得一模一样，因此无法通过编译。
+由于Java中的泛型是伪泛型，参数List\<Integer>和List\<String>编译之后都被擦除了，变成了一样的原生类型List\<E>，擦除动作导致这两种方法的特征签名变得一模一样，因此无法通过编译。
 
     public class Generic{
         public Integer method(List<Integer> list){
