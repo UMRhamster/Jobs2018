@@ -279,3 +279,53 @@ Java类伴随其类加载器具备了带有优先级的层次关系，确保了�
     }
 
 普通内部类会持有外部类的引用
+
+<h2>Java语法糖</h2>
+几乎各种编程语言或多或少都会提供一些 语法糖来方便程序员的代码开发，这些语法糖虽然不会提供实质性的功能改进，但是它们或能提高效率，或能提升语法的严谨性，或能减少编译出错的机会。
+
+语法糖可以看作是编译器实现的一些"小把戏"，这些"小把戏"可能会使得效率"大提升"，但我们也应该去了解这些"小把戏"背后的真实世界，那样才能利用好它们，而不是被它们所迷惑。
+
+### 泛型与类型擦除
+泛型是JDK 1.5 的一项新特性，它们的本质是参数化类型（Parametersized Type）的应用，也就是说所操作的数据类型被指定为一个参数。这种参数类型可以用在类、接口和方法的创建中，分别称为泛型类、泛型接口、泛型方法。
+
+泛型思想早在C++语言的模板（Template）中就开始生根发芽，在Java语言处于还没有出现泛型的版本时，只能通过Object是所有类型的父类和类型强制转换两个特点的配合来实现类型泛化。
+
+泛型技术在C#和Java之中的使用方式看似相同，但实现上却有着根本性的分歧，C#里面泛型无论在程序源码中、编译后的IL中（Intermediate Language，中间语言，这时候泛型是一个占位符），或是运行期的CLR中，都是切实存在的，List<Integer>与List<String>就是两个不同的类型，它们在系统运行期生成，有自己的虚方法表和类型参数，这种实现称为类型膨胀，基于这种方法实现的泛型称为真实泛型。
+
+Java语言中的泛型规则则不一样，它只在程序源码中存在，在编译后的字节码文件中，就已经替换为原来的原生类型（Raw Type，也称为裸类型）了，并且在相应的地方插入了强制类型代码，因此，对于运行期的Java语言来说，ArrayList<Integer>和List<String>就是同一个类，所以泛型技术实际上是Java的一颗语法糖，Java语言中的泛型实现方法称为类型擦除，基于这种方法实现的泛型称为伪泛型。
+
+    public static void main(String[] args){
+        Map<Integer,String> map = new HashMap<>();
+        map.put(1,"你好");
+    }
+
+使用javac命令将这段代码编译成class文件，再通过[jd-gui](http://jd.benow.ca/)反编译工具进行反编译，将会发现泛型都不见了，程序又变回了Java泛型出现之前的写法，即如下。
+
+
+    public static void main(String[] args){
+        Map map = new HashMap();
+        map.put(Integer.valueOf(1),"你好");
+    }
+[使用jd-gui反编译工具时可能遇到的问题：The application requires a java runtime environment 1.7.0](https://blog.csdn.net/k2514091675/article/details/76254729)
+
+    public class Generic{
+        public void method(List<Integer> list){}
+
+        public void method(List<String> list){}
+    }
+
+由于Java中的泛型是伪泛型，参数List<Integer>和List<String>编译之后都被擦除了，变成了一样的原生类型List<E>，擦除动作导致这两种方法的特征签名变得一模一样，因此无法通过编译。
+
+    public class Generic{
+        public Integer method(List<Integer> list){
+            return 1;
+        }
+
+        public String method(List<String> list){
+            return "";
+        }
+    }
+
+然而这段代码却可以通过编译，首先注意这并不是方法重载，方法重载不是根据返回值来确定的。之所以能够编译成功的原因是，在class文件格式中，只要描述不是完全一致的两个方法就可以共存，也就是说，两个方法如果有相同的名称和特征签名，但返回值不同，那么它们也是可以合法地共存于一个class文件中的。
+
+编译成功仅限于jdk1.6及以下，jdk1.7及以上是编译不通过的。
